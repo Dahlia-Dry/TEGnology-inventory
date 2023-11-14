@@ -1,0 +1,31 @@
+{% load static %}
+<div class="table-responsive">
+    <table class="table table-striped table-sm" 
+    data-toggle="table" 
+    data-pagination="true"
+    data-page-list="[10, 25, 50, 100, all]"
+    data-click-to-select="true"
+    id="{{id}}"> 
+      <thead>
+        <tr>
+          <th></th>
+          <th data-field="state" data-checkbox="true"></th>
+          {% for key in keys %}
+          <th scope="col" data-sortable="true">{{key}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in data %}
+        <tr>
+            <td><a href="{{row.0}}" title="Edit Item"><i class="bi bi-pencil-square"></i></a></td>
+            {% for cell in row %}
+            {% if not forloop.first %}
+            <td>{{cell|safe}}</td>
+            {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
