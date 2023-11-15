@@ -28,7 +28,7 @@ class Customer(models.Model):
     email=models.CharField(max_length=20,blank=True,null=True)
     def save(self, *args, **kwargs):
         self.address= self.address.replace(',','<br/>')
-        self.shipping_address= self.shipping_addresss.replace(',','<br/>')
+        self.shipping_address= self.shipping_address.replace(',','<br/>')
         super(Order, self).save(*args, **kwargs)
 class Order(models.Model):
     name = models.CharField(max_length=200,unique=True) 
