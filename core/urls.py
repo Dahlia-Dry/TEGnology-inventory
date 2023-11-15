@@ -12,4 +12,5 @@ urlpatterns = [path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.
                path('orders',views.orders,name='orders'),
                path('inventory',views.inventory,name='inventory'),
                path('edit/<str:pk>',views.edit_entry,name='edit_entry'),
+               path('edit_customer',views.edit_customer,name='edit_customer'),
                path('profile',views.profile,name='profile')]

@@ -13,6 +13,26 @@
 </div> 
   {{entries|safe}}
 
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Purchases</h1>
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="form_id" value="mark_as_delivered">
+    <input type="hidden" name ="purchase_pks" id="purchase_pks" value="">
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group px-1">
+            <button type="submit" class="btn btn-sm btn-outline-secondary" onclick="getPurchasePKs()" ><span data-feather="truck"></span> Mark Selected as Delivered</button>
+        </div>
+    </div>
+    </form>
+</div> 
+{{purchases|safe}}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">Deliveries</h1>
+</div> 
+{{deliveries|safe}}
+
 <!-- Modal -->
 <div class="modal fade" id="addEntryModal" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog" role="document">
@@ -78,9 +98,8 @@
 <script>
     //var table = document.getElementById('entrytable')
     var $table = $('#entrytable')
-    console.log('here');
     function getEntryPKs() {
-        console.log($table.bootstrapTable('getSelections'));
+        //console.log($table.bootstrapTable('getSelections'));
         let i=0;
         var selections = $table.bootstrapTable('getSelections');
         function getpk(row){
@@ -88,7 +107,19 @@
         }
         var ids = selections.map(getpk)
         document.getElementById("entry_pks").value = ids.toString();
+        console.log(ids.toString())
         document.getElementById("n_delete_entries").innerHTML=ids.length;
+    }
+    var $ptable = $('#purchasetable')
+    function getPurchasePKs() {
+        console.log($ptable.bootstrapTable('getSelections'));
+        let i=0;
+        var selections = $ptable.bootstrapTable('getSelections');
+        function getpk(row){
+            return row[0];
+        }
+        var ids = selections.map(getpk)
+        document.getElementById("purchase_pks").value = ids.toString();
     }
     $(document).on("click", ".edit-entry", function (e) {
         e.preventDefault();

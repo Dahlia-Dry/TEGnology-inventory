@@ -8,17 +8,19 @@
     id="{{id}}"> 
       <thead>
         <tr>
-          <th></th>
+          <th scope="col" data-visible="false">id</th>
           <th data-field="state" data-checkbox="true"></th>
           {% for key in keys %}
           <th scope="col" data-sortable="true">{{key}}</th>
           {% endfor %}
+          
         </tr>
       </thead>
       <tbody>
         {% for row in data %}
         <tr>
-            <td><a href="{{row.0}}" title="Edit Item"><i class="bi bi-pencil-square"></i></a></td>
+          <td>{{row.0}}</td>
+          <td></td>
             {% for cell in row %}
             {% if not forloop.first %}
             <td>{{cell|safe}}</td>

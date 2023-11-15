@@ -18,7 +18,7 @@ else:
 home_items = [('Dashboard','','activity'),
               ('Orders','/orders','inbox'),
               ('Inventory','/inventory','package'),
-              ('Customers','/customers','users'),
+              #('Customers','/customers','users'),
               ('User Profile','/profile','user')]
 page_items = [(x[0],os.path.join('../',x[1]), x[2]) for x in home_items]
 
@@ -91,13 +91,21 @@ def inventory(request):
             form = EntryForm(request.POST, instance=entry)
             if form.is_valid():
                 form.save() 
+        elif request.POST['form_id'] == 'mark_as_delivered':
+            pks = request.POST['purchase_pks'].split(',')
+            for pk in pks:
+                try:
+                    instance = Purchase.objects.get(id=pk)
+                    instance.status='delivered'
+                    instance.save()
+                except:
+                    pass
     context={'menu_items':page_items,
              'currentpage':'Inventory',
              'entryform':EntryForm()}
     entries = Entry.objects.all()
     #context['add_entry_link'] = host+'/admin/core/entry/add/'
     entry_context={}
-    entry_context['id']='entrytable'
     entry_context['keys'] = ['product','date','quantity','user']
     entry_context['data'] = []
     for item in entries:
@@ -111,15 +119,13 @@ def inventory(request):
     context['entries']= entries
 
     purchases = Purchase.objects.filter(status='pending')
-    context['add_purchase_link'] = host+'/admin/core/purchase/add/'
     purchase_context={}
-    purchase_context['id']='purchasetable'
     purchase_context['keys'] = ['order','status','order_date','product','quantity']
-    context['entry_keys'] = entry_context['keys']
     purchase_context['data'] = []
+    purchase_context['id']='purchasetable'
     for item in purchases:
-        buf=[item.get_edit_url(),f"""<td><a href= "{item.order.get_edit_url()}" title="Edit in Pipedrive">{item.order.name}</a></td>"""]
-        for key in purchase_context['keys'][1:]:
+        buf=[item.id]
+        for key in purchase_context['keys']:
             buf.append(eval(f'item.{key}'))
         purchase_context['data'].append(buf)
     purchases=render_to_string('components/purchase_table.html',purchase_context)
@@ -127,12 +133,12 @@ def inventory(request):
 
     deliveries = Purchase.objects.filter(status='delivered')
     delivery_context={}
-    delivery_context['id']='deliverytable'
     delivery_context['keys'] = ['order','status','order_date','product','quantity']
     delivery_context['data'] = []
+    delivery_context['id']='deliverytable'
     for item in deliveries:
-        buf=[item.get_edit_url(),f"""<td><a href= "{item.order.get_edit_url()}" title="Edit in Pipedrive">{item.order.name}</a></td>"""]
-        for key in delivery_context['keys'][1:]:
+        buf=[item.id]
+        for key in delivery_context['keys']:
             buf.append(eval(f'item.{key}'))
         delivery_context['data'].append(buf)
     deliveries=render_to_string('components/purchase_table.html',delivery_context)
@@ -144,6 +150,14 @@ def edit_entry(request,pk):
     print(entry)
     form=EntryForm(instance=entry)
     return render(request,'components/edit_entry.html',{'form':form,'pk':pk})
+
+def edit_customer(request):
+    print(request)
+    pk = request.POST['form_id']
+    customer=get_object_or_404(Customer, order=Order.objects.get(id=pk))
+    print(customer)
+    form=CustomerForm(instance=customer)
+    return render(request,'components/edit_customer.html',{'form':form,'pk':customer.id})
 
 def profile(request):
     profile=get_object_or_404(Profile,user=request.user)

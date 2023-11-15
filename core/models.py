@@ -14,6 +14,8 @@ class Profile(models.Model):
 class Product(models.Model):
     name= models.CharField(max_length=200,unique=True)
     pipedrive_id=models.IntegerField(blank=True)
+    def __str__(self):
+        return self.name
 class Customer(models.Model):
     name = models.CharField(max_length=200,unique=True)
     address = models.TextField(max_length=500,blank=True,null=True)
@@ -32,6 +34,8 @@ class Customer(models.Model):
         if self.shipping_address is not None:
             self.shipping_address= self.shipping_address.replace(',','<br/>')
         super(Customer, self).save(*args, **kwargs)
+    def __str__(self):
+        return self.name
 class Order(models.Model):
     name = models.CharField(max_length=200,unique=True) 
     pipedrive_id = models.IntegerField(primary_key=True)
@@ -42,11 +46,12 @@ class Order(models.Model):
     total = models.FloatField()
     currency = models.CharField(max_length=3,blank=True,null=True)
     order_number=models.CharField(max_length=20,blank=True,null=True)
+    def __str__(self):
+        return self.name
     def get_edit_url(self):
         return f'https://tegnology2.pipedrive.com/deal/{self.pipedrive_id}'
     def save(self, *args, **kwargs):
         super(Order, self).save(*args, **kwargs)
-
 
 class Purchase(models.Model):
     order=models.ForeignKey(Order,on_delete=models.CASCADE,null=True)
