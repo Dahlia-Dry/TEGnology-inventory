@@ -27,8 +27,10 @@ class Customer(models.Model):
     phone=models.CharField(max_length=20,blank=True,null=True)
     email=models.CharField(max_length=20,blank=True,null=True)
     def save(self, *args, **kwargs):
-        self.address= self.address.replace(',','<br/>')
-        self.shipping_address= self.shipping_address.replace(',','<br/>')
+        if self.address is not None:
+            self.address= self.address.replace(',','<br/>')
+        if self.shipping_address is not None:
+            self.shipping_address= self.shipping_address.replace(',','<br/>')
         super(Order, self).save(*args, **kwargs)
 class Order(models.Model):
     name = models.CharField(max_length=200,unique=True) 
