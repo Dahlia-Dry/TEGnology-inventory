@@ -31,7 +31,7 @@ class Customer(models.Model):
             self.address= self.address.replace(',','<br/>')
         if self.shipping_address is not None:
             self.shipping_address= self.shipping_address.replace(',','<br/>')
-        super(Order, self).save(*args, **kwargs)
+        super(Customer, self).save(*args, **kwargs)
 class Order(models.Model):
     name = models.CharField(max_length=200,unique=True) 
     pipedrive_id = models.IntegerField(primary_key=True)
