@@ -108,9 +108,9 @@
 								</td>
 
 								<td>
-									Invoice #: 123<br />
-									Created: January 1, 2023<br />
-									Due: February 1, 2023
+									Invoice #: {{invoice.invoice_number}}<br />
+									Created: {{invoice.created_date}}<br />
+									Due: {{invoice.due_date}}
 								</td>
 							</tr>
 						</table>
@@ -122,15 +122,13 @@
 						<table>
 							<tr>
 								<td>
-									Sparksuite, Inc.<br />
-									12345 Sunny Road<br />
-									Sunnyville, CA 12345
+									{{invoice.order.customer.address|safe}}
 								</td>
 
 								<td>
-									Acme Corp.<br />
-									John Doe<br />
-									john@example.com
+									{{invoice.order.customer.name}}<br />
+									{{invoice.contact_person}}<br />
+									{{invoice.contact_email}}
 								</td>
 							</tr>
 						</table>
@@ -138,68 +136,59 @@
 				</tr>
 
 				<tr class="heading">
-					<td>Payment Method</td>
-
-					<td>Check #</td>
-				</tr>
-
-				<tr class="details">
-					<td>Check</td>
-
-					<td>1000</td>
-				</tr>
-
-				<tr class="heading">
 					<td>Item</td>
+
+					<td>Quantity</td>
 
 					<td>Price</td>
 				</tr>
-
+				
+				{% for item in line_items %}
 				<tr class="item">
-					<td>Website design</td>
+					<td>{{item.name}}</td>
 
-					<td>$300.00</td>
+					<td>{{item.quantity}}</td>
+
+					<td>{{item.price}}</td>
 				</tr>
+				{% endfor %}
 
-				<tr class="item">
-					<td>Hosting (3 months)</td>
-
-					<td>$75.00</td>
-				</tr>
-
-				<tr class="item last">
-					<td>Domain name (1 year)</td>
-
-					<td>$10.00</td>
+				<tr class="total">
+					<td></td>
+					<td>Total ex. VAT: {{invoice.order.total}}</td>
+					
 				</tr>
 
 				<tr class="total">
 					<td></td>
-
-					<td>Total: $385.00</td>
+					<td>VAT: {{invoice.VAT}} %</td>
 				</tr>
+
+				<tr class="total">
+					<td></td>
+					<td>Total inc. VAT: {{invoice.total_vat}}</td>
+				</tr>
+				
                 <tr class="information">
 					<td colspan="3">
 						<table>
 							<tr>
 								<td>
-									TEGnology Aps<br />
-									Maskinvej 5<br />
-									2860 Søborg<br />
-                                    Denmark
+									{{tegnology.address|safe}}
+									
 								</td>
 
 								<td>
-									Bank account: 54440240394<br />
-									IBAN: DK7054440000240394<br />
-									SWIFT/BIC: ALBADKKK<br />
-                                    Arbejdernes Landsbank
+									Bank account: {{tegnology.bank_account}}<br />
+									IBAN: {{tegnology.IBAN}}<br/>
+									SWIFT/BIC: {{tegnology.SWIFT_BIC}}<br/>
+                                    {{tegnology.bank_name}}
 								</td>
 
                                 <td>
-									CVR: 33370873<br />
-									phone: +45 22837732<br />
-									e-mail: info@TEGnology.dk
+									CVR: {{tegnology.cvr}}<br />
+									phone: {{tegnology.phone}}<br />
+									e-mail: {{tegnology.email}}
 								</td>
 							</tr>
 						</table>

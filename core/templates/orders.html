@@ -1,7 +1,21 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 <h2>Orders</h2>
 {{orders|safe}}
 <h2>Invoice</h2>
 <p align="center"><iframe id='invoice' src="" width="95%" height=700vh></iframe></p>
+{% endblock %}
+{% block script %}
+<script>
+$('#table').on('click-row.bs.table', function (row,$el,field) {
+    console.log($el[0]);
+    var static_url="{% get_static_prefix %}";
+    console.log(static_url);
+    var filename = "assets/invoices/invoice-"+$el[0]+".pdf#navpanes=0"; 
+    document.getElementById('invoice').src = static_url+filename;
+    $(".selected").removeClass("selected");
+    field[0].classList.add('selected');
+})
+</script>
 {% endblock %}

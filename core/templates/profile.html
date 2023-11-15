@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if popup %}
+<div class="alert alert-success p-1 m-2" role="alert">
+    Profile changes have been saved.
+</div>
+{% endif %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Hi, {{user.username}}</h1>
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group px-1">
+            <a href="{% url 'logout' %}"><button type="button" class="btn btn-sm btn-outline-secondary" ><span data-feather="log-out"></span> Log Out</button></a>
+        </div>
+    </div>
+</div> 
+<form method="POST">
+    {% csrf_token %}
+    {{ profile.as_p }}
+    <button type="submit" class="btn btn-sm btn-outline-success">Save</button>
+</form>
+{% endblock %}

@@ -7,6 +7,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from .forms import *
 import os
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 
 if settings.DEBUG:
     host='http://127.0.0.1:8000' #localhost
@@ -16,10 +18,11 @@ else:
 home_items = [('Dashboard','','activity'),
               ('Orders','/orders','inbox'),
               ('Inventory','/inventory','package'),
-              ('Customers','/customers','users')]
+              ('Customers','/customers','users'),
+              ('User Profile','/profile','user')]
 page_items = [(x[0],os.path.join('../',x[1]), x[2]) for x in home_items]
 
-# Create your views here.
+@login_required
 def dashboard(request):
     products=Product.objects.all()
     delivered = []
@@ -44,12 +47,13 @@ def dashboard(request):
              'inventorychart':inventory.to_html()}
     return render(request,'dashboard.html',context)
 
+@login_required
 def orders(request):
     queryset = Order.objects.all()
     keys=['name','pipedrive_id','last_updated','close_date']
     data = []
     for item in queryset:
-        buf=[(item.get_edit_url(),item.name)]
+        buf=[(item.pipedrive_id,item.get_edit_url(),item.name)]
         for key in keys[1:]:
             buf.append(eval(f'item.{key}'))
         data.append(buf)
@@ -68,6 +72,11 @@ def inventory(request):
             if form.is_valid():
                 entry= form.save(commit=False)
                 entry.save()
+                send_mail("New inventory added", 
+                            "new inventory :0", 
+                            from_email=settings.EMAIL_HOST_USER, 
+                            recipient_list=[settings.ADMIN_EMAIL], 
+                            fail_silently=False)
         elif request.POST['form_id'] == "delete_entries":
             pks = request.POST['entry_pks'].split(',')
             for pk in pks:
@@ -135,3 +144,19 @@ def edit_entry(request,pk):
     print(entry)
     form=EntryForm(instance=entry)
     return render(request,'components/edit_entry.html',{'form':form,'pk':pk})
+
+def profile(request):
+    profile=get_object_or_404(Profile,user=request.user)
+    context={'menu_items':page_items,
+             'currentpage':'User Profile'}
+    if request.method == "POST":
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+        context['profile'] = form
+        context['popup'] = True
+        return render(request,'profile.html',context)
+    else:
+        form=ProfileForm(instance=profile)
+        context['profile'] = form
+        return render(request,'profile.html',context)

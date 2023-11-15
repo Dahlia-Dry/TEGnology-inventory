@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if form.errors %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h3>Your username and password didn't match. Please try again.</h3>
+</div> 
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h3>Your account doesn't have access to this page. To proceed,
+            please login with an account that has access.</h3>
+    </div> 
+    {% else %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h3>Please login to see this page.</h3>
+    </div> 
+    {% endif %}
+{% else %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h3>Log in</h3>
+</div> 
+{% endif %}
+
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+<table>
+<tr>
+    <td>{{ form.username.label_tag }}</td>
+    <td>{{ form.username }}</td>
+</tr>
+<tr>
+    <td>{{ form.password.label_tag }}</td>
+    <td>{{ form.password }}</td>
+</tr>
+</table>
+
+<div class="btn-toolbar" role="toolbar">
+    <button type="submit" class="btn btn-sm btn-outline-secondary my-3" value="login"><span data-feather="log-in"></span> Log in</button>
+</div>
+
+<input type="hidden" name="next" value="{{ next }}">
+</form>
+
+{# Assumes you set up the password_reset view in your URLconf #}
+<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+
+{% endblock %}
