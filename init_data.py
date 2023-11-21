@@ -18,11 +18,11 @@ client.set_api_token(config('PIPEDRIVE_API_TOKEN'))
 
 def create_timestamp():
     try:
-        t=Timestamp.objects.get(name='last_pipedrive_sync')
+        t=Timestamp.objects.get(label='last_pipedrive_sync')
         t.delete()
     except:
         pass
-    t=Timestamp.objects.create(name='last_pipedrive_sync')
+    t=Timestamp.objects.create(label='last_pipedrive_sync')
     t.save()
 
 def create_tegnology():
