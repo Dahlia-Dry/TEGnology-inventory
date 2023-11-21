@@ -9,16 +9,25 @@
       <thead>
         <tr>
           <th scope="col" data-visible="false">id</th>
-          {% for key in keys %}
+          <th scope="col" data-sortable="true">name</th>
+          <th scope="col" data-sortable="true">status</th>
+          {% for key in visible_keys %}
           <th scope="col" data-sortable="true">{{key}}</th>
+          {% endfor %}
+          {% for key in invisible_keys %}
+          <th scope="col" data-visible="false">{{key}}</th>
           {% endfor %}
         </tr>
       </thead>
       <tbody>
         {% for row in data %}
+        {% if row.0.0 %}
+        <tr class="selected">
+        {% else %}
         <tr>
-            <td>{{row.0.0}}</td>
-            <td><a href="{{row.0.1}}" title="Edit in Pipedrive">{{row.0.2}}</a></td>
+        {% endif %}
+            <td>{{row.0.1}}</td>
+            <td><a href="{{row.0.2}}" title="Edit in Pipedrive">{{row.0.3}}</a></td>
             {% for cell in row %}
             {% if not forloop.first %}
             <td>{{cell}}</td>

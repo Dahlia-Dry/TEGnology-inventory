@@ -1,3 +1,6 @@
+.hidden{
+  display: none !important;
+}
 .page-item.active .page-link {
   background-color:#1D3D3D;
   border-color:#1D3D3D;
@@ -22,6 +25,21 @@
 .btn-outline-secondary:hover {
   background-color:#1D3D3D;
   border-color:#1D3D3D;
+}
+
+.btn-danger {
+  background-color:#bc2a1a;
+  border-color:#bc2a1a;
+}
+
+.btn-outline-danger {
+  color:#bc2a1a;
+  border-color:#bc2a1a;
+}
+
+.btn-outline-danger:hover {
+  background-color:#bc2a1a;
+  border-color:#bc2a1a;
 }
 
 a {

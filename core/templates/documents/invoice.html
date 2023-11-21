@@ -122,9 +122,9 @@
 						<table>
 							<tr>
 								<td>
-									{{invoice.order.customer.name}}<br />
-									{{invoice.order.customer.address|safe}}<br />
-									{{invoice.order.customer.cvr}}<br />
+									{{customer.name}}<br />
+									{{customer.address|linebreaks}}<br />
+									{{customer.cvr}}<br />
 									Attn: {{invoice.contact_person}}<br />
 									{{invoice.contact_email}}
 								</td>
@@ -153,13 +153,13 @@
 
 				<tr class="total">
 					<td></td>
-					<td>Total ex. VAT: {{invoice.order.total}}</td>
+					<td>Total ex. VAT: {{invoice.total}}</td>
 					
 				</tr>
 
 				<tr class="total">
 					<td></td>
-					<td>VAT: {{invoice.VAT}} %</td>
+					<td>VAT: {{invoice.vat}} %</td>
 				</tr>
 
 				<tr class="total">
@@ -173,20 +173,19 @@
 							<tr>
 								<td>
 									{{tegnology.address|safe}}
-									
 								</td>
 
 								<td>
-									Bank account: {{tegnology.bank_account}}<br />
+									Bank account: {{tegnology.bank_account}}<br/>
 									IBAN: {{tegnology.IBAN}}<br/>
 									SWIFT/BIC: {{tegnology.SWIFT_BIC}}<br/>
                                     {{tegnology.bank_name}}
 								</td>
 
                                 <td>
-									CVR: {{tegnology.cvr}}<br />
-									phone: {{tegnology.phone}}<br />
-									e-mail: {{tegnology.email}}
+									CVR: {{tegnology.cvr}}<br/>
+									phone: {{tegnology.phone}}<br/>
+									e-mail: {{tegnology.email}} <br/>
 								</td>
 							</tr>
 						</table>

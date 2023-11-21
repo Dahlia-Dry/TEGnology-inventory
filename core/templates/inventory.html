@@ -13,26 +13,6 @@
 </div> 
   {{entries|safe}}
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Purchases</h1>
-    <form method="POST">
-      {% csrf_token %}
-      <input type="hidden" name="form_id" value="mark_as_delivered">
-    <input type="hidden" name ="purchase_pks" id="purchase_pks" value="">
-    <div class="btn-toolbar" role="toolbar">
-        <div class="btn-group px-1">
-            <button type="submit" class="btn btn-sm btn-outline-secondary" onclick="getPurchasePKs()" ><span data-feather="truck"></span> Mark Selected as Delivered</button>
-        </div>
-    </div>
-    </form>
-</div> 
-{{purchases|safe}}
-
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 class="h2">Deliveries</h1>
-</div> 
-{{deliveries|safe}}
-
 <!-- Modal -->
 <div class="modal fade" id="addEntryModal" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog" role="document">

@@ -9,13 +9,48 @@
     <h1 class="h2">Hi, {{user.username}}</h1>
     <div class="btn-toolbar" role="toolbar">
         <div class="btn-group px-1">
+            <a class='change-password' id='change-password' href="/profile/change-password" data-popup-url="/profile/change-password"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="key"></span> Change Password</button></a>
+        </div>
+        <div class="btn-group px-1">
             <a href="{% url 'logout' %}"><button type="button" class="btn btn-sm btn-outline-secondary" ><span data-feather="log-out"></span> Log Out</button></a>
         </div>
     </div>
 </div> 
 <form method="POST">
     {% csrf_token %}
+    <input type="hidden" name="form_id" value="edit_notification_settings">
     {{ profile.as_p }}
     <button type="submit" class="btn btn-sm btn-outline-success">Save</button>
 </form>
+
+<div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form method="POST" class="modal-content">
+            {% csrf_token %}
+            <input type="hidden" name="form_id" value="change_password">
+            <div class="modal-header">
+              <h5 class="modal-title">Change Password</h5>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-sm btn-outline-success">Save</button>
+            </div>
+        </form>
+      </div>
+</div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+$(document).on("click", ".change-password", function (e) {
+    e.preventDefault();
+    var $popup = $("#changePasswordModal");
+    var popup_url = $(this).data("popup-url");
+    $(".modal-body", $popup).load(popup_url, function () {
+    $popup.modal("show");
+    });
+    });
+</script>
 {% endblock %}
