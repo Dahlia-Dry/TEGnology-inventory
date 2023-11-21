@@ -22,7 +22,7 @@ def create_timestamp():
         t.delete()
     except:
         pass
-    t=Timestamp.objecst.create(name='last_pipedrive_sync')
+    t=Timestamp.objects.create(name='last_pipedrive_sync')
     t.save()
 
 def create_tegnology():
