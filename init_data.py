@@ -16,6 +16,15 @@ from django.utils.translation import gettext_lazy as _
 client = Client(domain=config('PIPEDRIVE_DOMAIN'))
 client.set_api_token(config('PIPEDRIVE_API_TOKEN'))
 
+def create_timestamp():
+    try:
+        t=Timestamp.objects.get(name='last_pipedrive_sync')
+        t.delete()
+    except:
+        pass
+    t=Timestamp.objecst.create(name='last_pipedrive_sync')
+    t.save()
+
 def create_tegnology():
     try:
         c = Customer.objects.get(name='TEGnology Aps')
@@ -85,5 +94,6 @@ def load_pipedrive_history():
         print(f"created order record for {d['title']}")
 
 if __name__ == '__main__':
+    create_timestamp()
     create_tegnology()
     load_pipedrive_history()
