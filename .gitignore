@@ -14,7 +14,7 @@ db.sqlite3
 # Static folder at project root
 /static/
 
-# macOS
+# macOS 
 ._*
 .DS_Store
 .fseventsd
