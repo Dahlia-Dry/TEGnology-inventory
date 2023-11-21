@@ -14,6 +14,8 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 
+from .pipedrive_utils import *
+
 if settings.DEBUG:
     host='http://127.0.0.1:8000' #localhost
 else:
@@ -54,6 +56,7 @@ def dashboard(request):
 
 @login_required
 def orders(request,pk=None):
+    sync_pipedrive_latest()
     if request.method=='POST':
         print(request.POST)
         if request.POST['form_id']=="edit_order_meta":

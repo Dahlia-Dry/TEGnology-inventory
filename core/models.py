@@ -129,3 +129,7 @@ class Invoice(models.Model):
         except Exception as e:
             print(e)
         super(Invoice, self).save(*args, **kwargs)
+
+class Timestamp(models.Model):
+    label = models.CharField(max_length=50)
+    last_updated = models.DateTimeField(auto_now= True)
