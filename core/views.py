@@ -17,7 +17,7 @@ from django.contrib.auth import update_session_auth_hash
 if settings.DEBUG:
     host='http://127.0.0.1:8000' #localhost
 else:
-    host='http://www.tegnology.pythonanywhere.com'
+    host='http://tegnology.pythonanywhere.com'
 
 home_items = [('Dashboard','','activity'),
               ('Orders','/orders','inbox'),
