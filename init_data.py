@@ -25,6 +25,13 @@ def create_timestamp():
     t=Timestamp.objects.create(label='last_pipedrive_sync')
     t.save()
 
+def init_media():
+    os.system('rm -rf media')
+    os.system('mkdir media/order_confirmations')
+    os.system('mkdir media/invoices')
+    os.system('mkdir media/purchase_orders')
+    os.system('mkdir media/quotations')
+
 def create_tegnology():
     try:
         c = Customer.objects.get(name='TEGnology Aps')
@@ -94,6 +101,7 @@ def load_pipedrive_history():
         print(f"created order record for {d['title']}")
 
 if __name__ == '__main__':
+    init_media()
     create_timestamp()
     create_tegnology()
     load_pipedrive_history()

@@ -13,6 +13,7 @@ import pdfkit
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
+from django.core.files.storage import FileSystemStorage
 
 from .pipedrive_utils import *
 
@@ -27,7 +28,11 @@ home_items = [('Dashboard','','activity'),
               #('Customers','/customers','users'),
               ('User Profile','/profile','user')]
 page_items = [(x[0],os.path.join('../',x[1]), x[2]) for x in home_items]
-file_objs = {'invoice':{'obj':Invoice,'form':InvoiceForm,'dateform':InvoiceDateForm},}
+#
+#'order_confirmation':{'obj':OrderConfirmation,'form':OrderConfirmationForm},
+file_objs = {'quotation':{'obj':Quotation,'form':QuotationForm},
+            'invoice':{'obj':Invoice,'form':InvoiceForm}}
+            #'delivery_notice':{'obj':DeliveryNotice,'form':DeliveryForm}}
 
 @login_required
 def dashboard(request):
@@ -59,27 +64,23 @@ def orders(request,pk=None):
     sync_pipedrive_latest()
     if request.method=='POST':
         print(request.POST)
+        filetype = request.POST['filetype']
+        order=get_object_or_404(Order, pipedrive_id=int(request.POST['pk']))
         if request.POST['form_id']=="edit_order_meta":
-            order=get_object_or_404(Order, pipedrive_id=int(request.POST['pk']))
             form = OrderForm(request.POST, instance=order)
             if form.is_valid():
                 form.save()
         if request.POST['form_id']=="edit_order_status":
-            order=get_object_or_404(Order, pipedrive_id=int(request.POST['pk']))
             form = OrderStatusForm(request.POST, instance=order)
             if form.is_valid():
                 order.prev_status_date=order.status_date
                 form.save()
         elif request.POST['form_id']=="delete_file":
-            filetype = request.POST['filetype']
-            order=get_object_or_404(Order, pipedrive_id=int(request.POST['pk']))
             setattr(order,filetype,None)
             order.save()
         elif request.POST['form_id'] =='set_date':
-            filetype = request.POST['filetype']
-            order=get_object_or_404(Order, pipedrive_id=int(request.POST['pk']))
             file_obj = getattr(order,filetype)
-            form = file_objs[filetype]['dateform'](request.POST,instance=file_obj)
+            form = gen_file_dateform(file_objs[filetype],data=request.POST,instance=file_obj)
             if form.is_valid():
                 form.save()
             if order.status < order.Status.INVOICE_SENT.value:
@@ -88,14 +89,23 @@ def orders(request,pk=None):
                 order.status_date=file_obj.sent_date
             order.save()
         elif request.POST['form_id'] =='undo_set_date':
-            filetype = request.POST['filetype']
-            order=get_object_or_404(Order, pipedrive_id=int(request.POST['pk']))
             file_obj = getattr(order,filetype)
             file_obj.sent_date=None
             file_obj.save()
             if order.status == order.Status.INVOICE_SENT.value:
                 order.status=order.status-1
                 order.status_date = order.prev_status_date
+            order.save()
+        elif request.POST['form_id']=='upload_file':
+            upload = request.FILES['file']
+            fs = FileSystemStorage()
+            doc_type = upload.name.split('.')[-1]
+            filename = filetype+'s'+'/'+filetype+'-'+request.POST['pk']+'.'+doc_type
+            file_instance = fs.save(filename, upload)
+            uploaded_file_url = fs.url(filename)
+            file_obj = file_objs[filetype]['obj'](filepath=os.path.join(host+settings.MEDIA_URL,filename))
+            file_obj.save()
+            setattr(order,filetype,file_obj)
             order.save()
     queryset = Order.objects.all()
     visible_keys=['customer','last_updated']
@@ -126,6 +136,7 @@ def orders(request,pk=None):
         selected_order= Order.objects.get(pipedrive_id=int(pk))
         progress= int((selected_order.status/len(Order.Status))*100)
         files= {f:getattr(selected_order,f) for f in file_objs}
+        file_forms={f:{'date':gen_file_dateform(file_objs[f]['obj'])} for f in file_objs}
         purchases = Purchase.objects.filter(order=selected_order)
         purchase_context={}
         purchase_context['keys'] = ['product','quantity','total']
@@ -142,7 +153,9 @@ def orders(request,pk=None):
         selected_order=None
         progress=0
         files=None
+        file_forms=None
         purchases=None
+    print(file_forms)
     context={'menu_items':page_items,
              'currentpage':'Orders',
              'orders':orders,
@@ -150,7 +163,7 @@ def orders(request,pk=None):
              'purchases':purchases,
              'progress_percent':progress,
              'files':files,
-             'file_form':{f:file_objs[f]['dateform']() for f in file_objs}}
+             'file_form':file_forms}
     return render(request,'orders.html',context)
 
 @login_required
@@ -206,32 +219,6 @@ def inventory(request):
         entry_context['data'].append(buf)
     entries=render_to_string('components/entry_table.html',entry_context)
     context['entries']= entries
-    """
-    purchases = Purchase.objects.filter(status='pending')
-    purchase_context={}
-    purchase_context['keys'] = ['order','status','order_date','product','quantity']
-    purchase_context['data'] = []
-    purchase_context['id']='purchasetable'
-    for item in purchases:
-        buf=[item.id]
-        for key in purchase_context['keys']:
-            buf.append(eval(f'item.{key}'))
-        purchase_context['data'].append(buf)
-    purchases=render_to_string('components/purchase_table.html',purchase_context)
-    context['purchases']= purchases
-
-    deliveries = Purchase.objects.filter(status='delivered')
-    delivery_context={}
-    delivery_context['keys'] = ['order','status','order_date','product','quantity']
-    delivery_context['data'] = []
-    delivery_context['id']='deliverytable'
-    for item in deliveries:
-        buf=[item.id]
-        for key in delivery_context['keys']:
-            buf.append(eval(f'item.{key}'))
-        delivery_context['data'].append(buf)
-    deliveries=render_to_string('components/purchase_table.html',delivery_context)
-    context['deliveries']= deliveries"""
     return render(request,'inventory.html',context)
 
 @login_required
@@ -293,9 +280,7 @@ def edit_order_meta(request,pk):
 def view_file(request,pk,filetype):
     order_instance = get_object_or_404(Order,pipedrive_id=int(pk))
     print(filetype)
-    if filetype == 'invoice':
-        instance = order_instance.invoice
-        print(instance)
+    instance= getattr(order_instance,filetype)
     return redirect(instance.filepath)
 
 @login_required
@@ -332,7 +317,9 @@ def gen_file(request,pk,filetype):
                 customer_form.save()
     context['form']=form
     context['customer']=customer=order_instance.customer
-    if filetype == 'invoice':
+    if filetype == 'quotation':
+        pass
+    elif filetype == 'invoice':
         purchases = Purchase.objects.filter(order=order_instance)
         line_items = []
         for p in purchases:
@@ -360,5 +347,9 @@ def gen_file(request,pk,filetype):
             order_instance.save()
             return redirect(os.path.join(host,f'/orders/id={order_instance.pipedrive_id}'))
         context['filepath'] = file_obj.filepath
+    elif filetype=='order_confirmation':
+        pass
+    elif filetype=='delivery_notice':
+        pass
     return render(request,'file_generate.html',context)
 

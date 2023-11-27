@@ -51,64 +51,77 @@
         </div>
         <div class="col-11">
             {% for filetype, file_obj in files.items %}
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-1 mb-1">
-                <h1 class="h2">{{filetype|title}}</h1>
-                {% if selected_order|get_attr:filetype is not None %}
-                <div class="btn-toolbar" role="toolbar">
-                    <div class="btn-group px-1">
-                        <a href="/orders/id={{selected_order.pipedrive_id}}/{{filetype}}" target="_blank"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="eye"></span> View File</button></a>
+                {% if file_obj is not None %}
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-1 mb-1">
+                        <h1 class="h2">{{filetype|title}}</h1>
+                            <div class="btn-toolbar" role="toolbar">
+                                <div class="btn-group px-1">
+                                    <a href="/orders/id={{selected_order.pipedrive_id}}/{{filetype}}" target="_blank"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="eye"></span> View File</button></a>
+                                </div>
+                                <div class="btn-group px-1">
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="form_id" value="delete_file">
+                                        <input type="hidden" name="filetype" value="{{filetype}}">
+                                        <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><span data-feather="trash"></span> Delete file</button>
+                                    </form>
+                                </div>
+                            </div>
                     </div>
-                    <div class="btn-group px-1">
-                        <form method="POST">
-                            {% csrf_token %}
-                            <input type="hidden" name="form_id" value="delete_file">
-                            <input type="hidden" name="filetype" value="{{filetype}}">
-                            <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
-                            <button type="submit" class="btn btn-sm btn-outline-danger"><span data-feather="trash"></span> Delete file</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-                {% if file_obj.sent_date is None %}
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="form_id" value="set_date">
-                <input type="hidden" name="filetype" value="{{filetype}}">
-                <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                    {% with form=file_form|key:filetype %}
-                    {{form.as_p}}
-                    {% endwith %}
-                    <div class="btn-toolbar" role="toolbar">
-                        <div class="btn-group px-1">
-                            <button type="submit" class="btn btn-sm btn-outline-success"><span data-feather="send"></span> Mark as Sent</button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-            {% else %}
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                <h4 class="h6" id="order-status">sent date: {{file_obj.sent_date}}</h4>
-                <div class=class="btn-toolbar" role="toolbar">
+                    {% if file_obj.sent_date is None %}
                     <form method="POST">
                         {% csrf_token %}
-                        <input type="hidden" name="form_id" value="undo_set_date">
+                        <input type="hidden" name="form_id" value="set_date">
                         <input type="hidden" name="filetype" value="{{filetype}}">
                         <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
-                        <div class="btn-group px-1">
-                            <button type="submit" class="btn btn-sm btn-outline-secondary"><span data-feather="rotate-ccw"></span> Undo Mark as Sent</button>
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                            {% with forms=file_form|key:filetype %}
+                            {{forms.date.as_p}}
+                            {% endwith %}
+                            <div class="btn-toolbar" role="toolbar">
+                                <div class="btn-group px-1">
+                                    <button type="submit" class="btn btn-sm btn-outline-success"><span data-feather="send"></span> Mark as Sent</button>
+                                </div>
+                            </div>
                         </div>
                     </form>
-                </div>
-            </div>
-            {% endif %}
-                {% else %}
-                <div class="btn-toolbar" role="toolbar">
-                    <div class="btn-group px-1">
-                        <a href="/orders/id={{selected_order.pipedrive_id}}/{{filetype}}/generate"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="file-plus"></span> Generate</button></a>
+                    {% else %}
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                        <h4 class="h6" id="order-status">sent date: {{file_obj.sent_date}}</h4>
+                        <div class=class="btn-toolbar" role="toolbar">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_id" value="undo_set_date">
+                                <input type="hidden" name="filetype" value="{{filetype}}">
+                                <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
+                                <div class="btn-group px-1">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary"><span data-feather="rotate-ccw"></span> Undo Mark as Sent</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-                {% endif %} 
+                    {% endif %}
+                {% else %}
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-1 mb-1 border-bottom">
+                        <h1 class="h2">{{filetype|title}}</h1>
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group px-1">
+                                <a href="/orders/id={{selected_order.pipedrive_id}}/{{filetype}}/generate"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="file-plus"></span> Generate</button></a>
+                            </div>
+                            <div class="btn-group px-1">
+                                <form method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="form_id" value="upload_file">
+                                    <input type="hidden" name="filetype" value="{{filetype}}">
+                                    <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
+                                    <input type="file" name="file">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary"> Upload</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
             {% endfor %}
         </div>
     </div>

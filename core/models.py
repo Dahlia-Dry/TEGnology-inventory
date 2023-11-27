@@ -66,7 +66,10 @@ class Order(models.Model):
     currency = models.CharField(max_length=3,blank=True,null=True)
     order_number=models.CharField(max_length=20,blank=True,null=True)
 
+    quotation=models.ForeignKey("Quotation",blank=True,null=True,on_delete=models.SET_NULL)
+    order_confirmation=models.ForeignKey("OrderConfirmation",blank=True,null=True,on_delete=models.SET_NULL)
     invoice=models.ForeignKey("Invoice",blank=True,null=True,on_delete=models.SET_NULL)
+    #delivery_notice=models.ForeignKey("DeliveryNotice",blank=True,null=True,on_delete=models.SET_NULL)
 
     notes = models.TextField(blank=True,null=True)
     
@@ -121,7 +124,6 @@ class Invoice(models.Model):
 
     def save(self, *args, **kwargs):
         print('saving')
-        
         try:
             t = self.total
             self.total = self.currency + f" {t:.2f}"
@@ -129,6 +131,36 @@ class Invoice(models.Model):
         except Exception as e:
             print(e)
         super(Invoice, self).save(*args, **kwargs)
+
+class OrderConfirmation(models.Model):
+    #mandatory fields
+    filepath = models.FilePathField() #can be generated or user upload
+
+    sent_date= models.DateField(verbose_name='sent date',blank=True,null=True)
+    created_date=models.DateField(blank=True,null=True)
+
+    def save(self, *args, **kwargs):
+        super(OrderConfirmation, self).save(*args, **kwargs)
+
+class DeliveryNotice(models.Model):
+    #mandatory fields
+    filepath = models.FilePathField() #can be generated or user upload
+
+    sent_date= models.DateField(verbose_name='sent date',blank=True,null=True)
+    created_date=models.DateField(blank=True,null=True)
+
+    def save(self, *args, **kwargs):
+        super(DeliveryNotice, self).save(*args, **kwargs)
+
+class Quotation(models.Model):
+    #mandatory fields
+    filepath = models.FilePathField() #can be generated or user upload
+
+    sent_date= models.DateField(verbose_name='sent date',blank=True,null=True)
+    created_date=models.DateField(blank=True,null=True)
+
+    def save(self, *args, **kwargs):
+        super(Quotation, self).save(*args, **kwargs)
 
 class Timestamp(models.Model):
     label = models.CharField(max_length=50)
