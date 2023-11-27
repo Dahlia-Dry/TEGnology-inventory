@@ -26,11 +26,12 @@ def create_timestamp():
     t.save()
 
 def init_media():
-    os.system('rm -rf media')
-    os.system('mkdir media/order_confirmations')
-    os.system('mkdir media/invoices')
-    os.system('mkdir media/purchase_orders')
-    os.system('mkdir media/quotations')
+    os.system('rm -rf core/media')
+    os.system('mkdir core/media')
+    os.system('mkdir core/media/order_confirmations')
+    os.system('mkdir core/media/invoices')
+    os.system('mkdir core/media/purchase_orders')
+    os.system('mkdir core/media/quotations')
 
 def create_tegnology():
     try:
