@@ -27,4 +27,4 @@ def fetch_pipedrive_latest():
         return new_deals
     else:
         return None
-
+ 
