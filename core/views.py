@@ -43,11 +43,13 @@ def dashboard(request):
     for p in products:
         names.append(p.name)
         qd= Purchase.objects.filter(status__gte=len(Order.Status)-1,product=p)
-        delivered.append(sum([d.quantity for d in qd]))
-        qp = Purchase.objects.filter(status__lt=len(Order.Status)-1,product=p)
-        pending.append(sum([p.quantity for p in qp]))
+        d_amt = sum([d.quantity for d in qd])
+        delivered.append(d_amt)
+        qp = Purchase.objects.filter(status__gt=1,status__lt=len(Order.Status)-1,product=p)
+        p_amt = sum([p.quantity for p in qp])
+        pending.append(p_amt)
         qi = Entry.objects.filter(product=p)
-        instock.append(sum([i.quantity for i in qi]))
+        instock.append(sum([i.quantity for i in qi])-p_amt-d_amt)
     inventory=go.Figure(data=[
         go.Bar(name='In Stock',x=names,y=instock,marker_color='#bc2a1a'),
         go.Bar(name='Pending', x=names, y=pending,marker_color='#abdae1'),
