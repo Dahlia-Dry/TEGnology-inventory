@@ -52,6 +52,7 @@ class Order(models.Model):
     pipedrive_id = models.IntegerField(primary_key=True)
 
     status = models.IntegerField(choices=Status.choices, default=Status.DEAL_CLOSED)
+    prev_status= models.IntegerField(choices=Status.choices, default=Status.DEAL_CLOSED)
     status_date=models.DateField(blank=True,null=True)
     prev_status_date= models.DateField(blank=True,null=True)
 
@@ -69,7 +70,7 @@ class Order(models.Model):
     quotation=models.ForeignKey("Quotation",blank=True,null=True,on_delete=models.SET_NULL)
     order_confirmation=models.ForeignKey("OrderConfirmation",blank=True,null=True,on_delete=models.SET_NULL)
     invoice=models.ForeignKey("Invoice",blank=True,null=True,on_delete=models.SET_NULL)
-    #delivery_notice=models.ForeignKey("DeliveryNotice",blank=True,null=True,on_delete=models.SET_NULL)
+    delivery_notice=models.ForeignKey("DeliveryNotice",blank=True,null=True,on_delete=models.SET_NULL)
 
     notes = models.TextField(blank=True,null=True)
     
@@ -119,7 +120,8 @@ class Invoice(models.Model):
     line_items = models.JSONField(blank=True,null=True)
     currency = models.CharField(max_length=3,blank=True,null=True)
     total = models.CharField(max_length=50,blank=True,null=True)
-    vat = models.FloatField(default=0,verbose_name="VAT (%)")
+    vat = models.FloatField(default=0,verbose_name="VAT (%)",blank=True,null=True)
+    vat_amt=models.FloatField(default=0,blank=True,null=True)
     total_vat = models.CharField(max_length=50,blank=True,null=True)
 
     def save(self, *args, **kwargs):
@@ -128,6 +130,7 @@ class Invoice(models.Model):
             t = self.total
             self.total = self.currency + f" {t:.2f}"
             self.total_vat = self.currency+f' {t*(1+self.vat/100):.2f}'
+            self.vat_amt = self.currency+f' {t*(self.vat/100):.2f}'
         except Exception as e:
             print(e)
         super(Invoice, self).save(*args, **kwargs)

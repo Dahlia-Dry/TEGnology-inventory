@@ -69,60 +69,29 @@ def gen_file_dateform(model_name,data=None,instance=None):
             }
     form = FileDateForm(data=data, instance=instance)
     return form
-
-
-class InvoiceDateForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['sent_date'].required = True
-    class Meta:
-        model = Invoice
-        fields =['sent_date']
-        widgets = {
-            'sent_date': DateInput(),
-        }
-
-class OrderConfirmationDateForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['sent_date'].required = True
-    class Meta:
-        model = OrderConfirmation
-        fields =['sent_date']
-        widgets = {
-            'sent_date': DateInput(),
-        }
-
-class DeliveryDateForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['sent_date'].required = True
-    class Meta:
-        model = DeliveryNotice
-        fields =['sent_date']
-        widgets = {
-            'sent_date': DateInput(),
-        }
-
-class QuotationDateForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['sent_date'].required = True
-    class Meta:
-        model = Quotation
-        fields =['sent_date']
-        widgets = {
-            'sent_date': DateInput(),
-        }
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
         fields =['name','order_number','contact_person','contact_email','notes']
 
 class OrderStatusForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['status_date'].required = True
     class Meta:
         model = Order
         fields=['status','status_date']
+        widgets = {
+            'status_date': DateInput(),
+        }
+
+class OrderCompleteForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['status_date'].required = True
+    class Meta:
+        model = Order
+        fields=['status_date']
         widgets = {
             'status_date': DateInput(),
         }

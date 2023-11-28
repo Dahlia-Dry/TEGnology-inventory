@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="d-flex flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+<div class="d-flex flex-wrap flex-md-nowrap align-items-center py-2">
     <div class="btn-toolbar" role="toolbar">
         <div class="btn-group px-1">
-            <a href="/orders/id={{pipedrive_id}}" ><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="arrow-left"></span>Back to Order</button></a>
+            <a href="/orders/{{pipedrive_id}}" ><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="arrow-left"></span>Back to Order</button></a>
         </div>
     </div>
 </div>
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-2 mb-3 border-bottom">
     
     <h1 id='order-name' class="h2"> Generate {{filetype}}</h1>
 </div> 

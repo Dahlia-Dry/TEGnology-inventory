@@ -28,11 +28,10 @@ home_items = [('Dashboard','','activity'),
               #('Customers','/customers','users'),
               ('User Profile','/profile','user')]
 page_items = [(x[0],os.path.join('../',x[1]), x[2]) for x in home_items]
-#
-#'order_confirmation':{'obj':OrderConfirmation,'form':OrderConfirmationForm},
-file_objs = {'quotation':{'obj':Quotation,'form':QuotationForm},
-            'invoice':{'obj':Invoice,'form':InvoiceForm}}
-            #'delivery_notice':{'obj':DeliveryNotice,'form':DeliveryForm}}
+file_objs = {'quotation':{'status':2,'obj':Quotation,'form':QuotationForm},
+             'order_confirmation':{'status':3,'obj':OrderConfirmation,'form':OrderConfirmationForm},
+            'invoice':{'status':4,'obj':Invoice,'form':InvoiceForm},
+            'delivery_notice':{'status':5,'obj':DeliveryNotice,'form':DeliveryForm}}
 
 @login_required
 def dashboard(request):
@@ -60,58 +59,39 @@ def dashboard(request):
     return render(request,'dashboard.html',context)
 
 @login_required
-def orders(request,pk=None):
+def orders(request):
     sync_pipedrive_latest()
+    pk = request.GET.get('id')
+    sortby=request.GET.get('sort')
+    filterby = request.GET.get('filter')
+    #deal with form submissions
     if request.method=='POST':
-        print(request.POST)
-        filetype = request.POST['filetype']
         order=get_object_or_404(Order, pipedrive_id=int(request.POST['pk']))
-        if request.POST['form_id']=="edit_order_meta":
-            form = OrderForm(request.POST, instance=order)
-            if form.is_valid():
-                form.save()
         if request.POST['form_id']=="edit_order_status":
             form = OrderStatusForm(request.POST, instance=order)
             if form.is_valid():
+                order.prev_status=order.status
                 order.prev_status_date=order.status_date
                 form.save()
-        elif request.POST['form_id']=="delete_file":
-            setattr(order,filetype,None)
-            order.save()
-        elif request.POST['form_id'] =='set_date':
-            file_obj = getattr(order,filetype)
-            form = gen_file_dateform(file_objs[filetype],data=request.POST,instance=file_obj)
-            if form.is_valid():
-                form.save()
-            if order.status < order.Status.INVOICE_SENT.value:
-                order.status=order.Status.INVOICE_SENT.value
-                order.prev_status_date=order.status_date
-                order.status_date=file_obj.sent_date
-            order.save()
-        elif request.POST['form_id'] =='undo_set_date':
-            file_obj = getattr(order,filetype)
-            file_obj.sent_date=None
-            file_obj.save()
-            if order.status == order.Status.INVOICE_SENT.value:
-                order.status=order.status-1
-                order.status_date = order.prev_status_date
-            order.save()
-        elif request.POST['form_id']=='upload_file':
-            upload = request.FILES['file']
-            fs = FileSystemStorage()
-            doc_type = upload.name.split('.')[-1]
-            filename = filetype+'s'+'/'+filetype+'-'+request.POST['pk']+'.'+doc_type
-            file_instance = fs.save(filename, upload)
-            uploaded_file_url = fs.url(filename)
-            file_obj = file_objs[filetype]['obj'](filepath=os.path.join(host+settings.MEDIA_URL,filename))
-            file_obj.save()
-            setattr(order,filetype,file_obj)
-            order.save()
-    queryset = Order.objects.all()
+    #apply sort and filter
+    queryargs = {}
+    if filterby=='pending':
+        queryargs['status__lt']=len(Order.Status)-1
+    elif filterby=='completed':
+        queryargs['status__gte']=len(Order.Status)-1
+    if sortby=='status-asc':
+        queryset=Order.objects.filter(**queryargs).order_by('status')
+    elif sortby=='status-desc':
+        queryset=Order.objects.filter(**queryargs).order_by('-status')
+    elif sortby=='updated-asc':
+        queryset=Order.objects.filter(**queryargs).order_by('last_updated')
+    elif sortby=='updated-desc':
+        queryset=Order.objects.filter(**queryargs).order_by('-last_updated')   
+    else:
+        queryset=Order.objects.filter(**queryargs)
     visible_keys=['customer','last_updated']
     invisible_keys= []
     data = []
-    print('PK',pk)
     for item in queryset:
         if pk is not None:
             if item.pipedrive_id==int(pk):
@@ -134,9 +114,9 @@ def orders(request,pk=None):
                                                              'data':data})
     try:
         selected_order= Order.objects.get(pipedrive_id=int(pk))
-        progress= int((selected_order.status/len(Order.Status))*100)
+        progress= int(((selected_order.status-1)/(len(Order.Status)-1))*100)
+        print(progress)
         files= {f:getattr(selected_order,f) for f in file_objs}
-        file_forms={f:{'date':gen_file_dateform(file_objs[f]['obj'])} for f in file_objs}
         purchases = Purchase.objects.filter(order=selected_order)
         purchase_context={}
         purchase_context['keys'] = ['product','quantity','total']
@@ -153,18 +133,119 @@ def orders(request,pk=None):
         selected_order=None
         progress=0
         files=None
-        file_forms=None
         purchases=None
-    print(file_forms)
+    print(files)
     context={'menu_items':page_items,
              'currentpage':'Orders',
              'orders':orders,
              'selected_order':selected_order,
              'purchases':purchases,
+             'sort_options':{'status-asc':'status - asc',
+                             'status-desc':'status - desc',
+                             'updated-asc':'last updated - asc',
+                             'updated-desc':'last updated - desc'},
+             'filter_options':{'all': 'all orders',
+                               'pending': 'pending orders',
+                               'completed': 'completed orders'},
+             'sortby':sortby,
+             'filterby': filterby,
+             'files':files}
+    return render(request,'orders.html',context)
+
+@login_required
+def order_detail(request,pk):
+    order = get_object_or_404(Order, pipedrive_id=int(pk))
+    if request.method=='POST':
+        if request.POST['form_id']=="edit_order_meta":
+            form = OrderForm(request.POST, instance=order)
+            if form.is_valid():
+                form.save()
+        elif request.POST['form_id']=="edit_order_status":
+            form = OrderStatusForm(request.POST, instance=order)
+            if form.is_valid():
+                order.prev_status=order.status
+                order.prev_status_date=order.status_date
+                form.save()
+        elif request.POST['form_id']=="mark_complete":
+            form = OrderCompleteForm(request.POST, instance=order)
+            if form.is_valid():
+                order.prev_status=order.status
+                order.prev_status_date=order.status_date
+                order.status = 6
+                form.save()
+        elif request.POST['form_id']=="undo_mark_complete":
+            order.status=order.prev_status
+            order.status_date=order.prev_status_date
+            order.save()
+        else:
+            filetype = request.POST['filetype']
+            if request.POST['form_id']=="delete_file":
+                setattr(order,filetype,None)
+                order.save()
+            elif request.POST['form_id'] =='set_date':
+                file_obj = getattr(order,filetype)
+                form = gen_file_dateform(file_objs[filetype]['obj'],data=request.POST,instance=file_obj)
+                if form.is_valid():
+                    order.prev_status=order.status
+                    order.status = file_objs[filetype]['status']
+                    order.prev_status_date=order.status_date
+                    order.status_date=file_obj.sent_date
+                    form.save()
+                order.save()
+            elif request.POST['form_id'] =='undo_set_date':
+                file_obj = getattr(order,filetype)
+                file_obj.sent_date=None
+                file_obj.save()
+                order.status=order.prev_status
+                order.status_date=order.prev_status_date
+                order.save()
+            elif request.POST['form_id']=='upload_file':
+                upload = request.FILES['file']
+                fs = FileSystemStorage()
+                doc_type = upload.name.split('.')[-1]
+                filename = filetype+'s'+'/'+filetype+'-'+request.POST['pk']+'.'+doc_type
+                if os.path.exists(os.path.join(settings.MEDIA_ROOT,filename)):
+                    #overwrite old file if exists
+                    os.system(f'rm {os.path.join(settings.MEDIA_ROOT,filename)}')
+                file_instance = fs.save(filename, upload)
+                uploaded_file_url = fs.url(filename)
+                file_obj = file_objs[filetype]['obj'](filepath=os.path.join(host+settings.MEDIA_URL,filename))
+                file_obj.save()
+                setattr(order,filetype,file_obj)
+                order.save()
+    try:
+        progress= int(((order.status-1)/(len(Order.Status)-1))*100)
+        print(progress)
+        files= {f:getattr(order,f) for f in file_objs}
+        file_forms={f:{'date':gen_file_dateform(file_objs[f]['obj'])} for f in file_objs}
+        purchases = Purchase.objects.filter(order=order)
+        purchase_context={}
+        purchase_context['keys'] = ['product','quantity','total']
+        purchase_context['data'] = []
+        purchase_context['id']='purchasetable'
+        for item in purchases:
+            buf=[item.id]
+            for key in purchase_context['keys']:
+                buf.append(eval(f'item.{key}'))
+            purchase_context['data'].append(buf)
+        purchases=render_to_string('components/purchase_table.html',purchase_context)
+    except Exception as e:
+        print(e)
+        order=None
+        progress=0
+        files=None
+        file_forms=None
+        purchases=None
+    context={'menu_items':page_items,
+             'currentpage':'Orders',
+             'selected_order':order,
+             'purchases':purchases,
              'progress_percent':progress,
              'files':files,
-             'file_form':file_forms}
-    return render(request,'orders.html',context)
+             'file_form':file_forms,
+             'complete_form': OrderCompleteForm(),
+             }
+    return render(request,'order_detail.html',context)
 
 @login_required
 def inventory(request):
@@ -267,7 +348,7 @@ def edit_customer(request,pk):
 @login_required
 def edit_order_status(request,pk):
     order=get_object_or_404(Order, pipedrive_id=int(pk))
-    form=OrderStatusForm(instance=order)
+    form=OrderStatusForm(instance=order,initial={'status_date':datetime.date.today()})
     return render(request,'components/edit_obj.html',{'form':form,'pk':pk})
 
 @login_required
@@ -282,6 +363,10 @@ def view_file(request,pk,filetype):
     print(filetype)
     instance= getattr(order_instance,filetype)
     return redirect(instance.filepath)
+
+@login_required
+def upload_file(request,pk,filetype):
+    return render(request,'components/upload_file.html',{'pk':pk})
 
 @login_required
 def gen_file(request,pk,filetype):
@@ -345,7 +430,7 @@ def gen_file(request,pk,filetype):
             print('saving invoice')
             order_instance.invoice=file_obj
             order_instance.save()
-            return redirect(os.path.join(host,f'/orders/id={order_instance.pipedrive_id}'))
+            return redirect(os.path.join(host,f'/orders/{order_instance.pipedrive_id}'))
         context['filepath'] = file_obj.filepath
     elif filetype=='order_confirmation':
         pass

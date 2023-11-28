@@ -9,13 +9,13 @@
       <thead>
         <tr>
           <th scope="col" data-visible="false">id</th>
-          <th scope="col" data-sortable="true">name</th>
-          <th scope="col" data-sortable="true">status</th>
+          <th scope="col">name</th>
+          <th scope="col">status</th>
           {% for key in visible_keys %}
-          <th scope="col" data-sortable="true">{{key}}</th>
+          <th scope="col">{{key}}</th>
           {% endfor %}
           {% for key in invisible_keys %}
-          <th scope="col" data-visible="false">{{key}}</th>
+          <th scope="col" >{{key}}</th>
           {% endfor %}
         </tr>
       </thead>

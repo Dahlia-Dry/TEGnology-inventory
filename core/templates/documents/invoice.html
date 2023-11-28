@@ -66,7 +66,6 @@
 			}
 
 			.invoice-box table tr.total td:nth-child(2) {
-				border-top: 2px solid #eee;
 				font-weight: bold;
 			}
 
@@ -153,19 +152,22 @@
 
 				<tr class="total">
 					<td></td>
-					<td>Total ex. VAT: {{invoice.total}}</td>
-					
+					<td>Total ex. VAT:</td>
+					<td>{{invoice.total}}</td>
 				</tr>
 
 				<tr class="total">
 					<td></td>
-					<td>VAT: {{invoice.vat}} %</td>
+					<td>VAT {{invoice.vat}}%:</td>
+					<td>{{invoice.vat_amt}}</td>
 				</tr>
 
 				<tr class="total">
 					<td></td>
-					<td>Total inc. VAT: {{invoice.total_vat}}</td>
+					<td>Total inc. VAT:</td>
+					<td>{{invoice.total_vat}}</td>
 				</tr>
+				
 				
                 <tr class="information">
 					<td colspan="3">

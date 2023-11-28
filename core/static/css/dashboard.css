@@ -111,6 +111,15 @@ body {
   color: #bc2a1a;
 }
 
+.dropdown-menu .nav-link {
+  color: #333;
+  font-size:small;
+}
+.dropdown-menu .nav-link.active {
+  color: #bc2a1a;
+  font-size:small;
+}
+
 .sidebar .nav-link:hover .feather,
 .sidebar .nav-link.active .feather {
   color: inherit;

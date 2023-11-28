@@ -9,3 +9,7 @@ def get_attr(obj, attr):
 @register.filter
 def key(obj, key):
     return obj[key]
+
+@register.filter
+def as_title(obj):
+    return str.title(obj.replace('_',' '))
