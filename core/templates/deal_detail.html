@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load tags %}
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-1">
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group px-1">
+            <a href="../deals"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="arrow-left-circle"></span> Back to Deals</button></a>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 id='order-name' class="h2">{{selected_order.name}}</h1>
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group px-1">
+            <a class='edit-order' id='edit-order' href="/deals/{{selected_order.pipedrive_id}}/edit_meta" data-popup-url="/orders/{{selected_order.pipedrive_id}}/edit_meta"><button type="button" class="btn btn-sm btn-outline-secondary"> <span data-feather="edit-3"></span> Edit Deal Details</button></a>
+        </div>
+    </div>
+</div> 
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-1">
+    <h4 class="h6">customer: {{selected_order.customer.name}}</h4>
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group px-1">
+            <a class='edit-customer' id='edit-customer' href="/customers/{{selected_order.customer.id}}/edit" data-popup-url="/customers/{{selected_order.customer.id}}/edit"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="user"></span> Edit Customer Info</button></a>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-1">
+    <h4 class="h6">total value: {{selected_order.currency}} {{selected_order.total}}</h4>
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group px-1">
+          <a href="{{selected_order.get_edit_url}}"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="database"></span> Edit Line Items in Pipedrive</button></a>
+        </div>
+    </div>
+  </div> 
+{{purchases|safe}}
+<div class="container py-3 ">
+    <div class="row status-components">
+        <div class="col">
+            <div class="status-checkpoint">
+                {% include 'components/file_checkpoint.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'components/modals/edit-order-modal.html' %}
+{% include 'components/modals/edit-status-modal.html' %}
+{% include 'components/modals/edit-customer-modal.html' %}
+{% endblock %}
+{% block script %}
+<script>
+$(document).on("click", ".edit-customer", function (e) {
+    e.preventDefault();
+    var $popup = $("#editCustomerModal");
+    var popup_url = $(this).data("popup-url");
+    $(".modal-body", $popup).load(popup_url, function () {
+    $popup.modal("show");
+    });
+});
+$(document).on("click", ".edit-status", function (e) {
+    e.preventDefault();
+    var $popup = $("#editStatusModal");
+    var popup_url = $(this).data("popup-url");
+    $(".modal-body", $popup).load(popup_url, function () {
+    $popup.modal("show");
+    });
+    });
+
+$(document).on("click", ".edit-order", function (e) {
+    e.preventDefault();
+    var $popup = $("#editOrderModal");
+    var popup_url = $(this).data("popup-url");
+    $(".modal-body", $popup).load(popup_url, function () {
+    $popup.modal("show");
+    });
+    });
+
+$(document).on("click", ".upload-file", function (e) {
+    e.preventDefault();
+    var $popup = $("#upload"+$(this).attr('name')+"Modal");
+    var popup_url = $(this).data("popup-url");
+    $(".modal-body", $popup).load(popup_url, function () {
+    $popup.modal("show");
+    });
+    });
+</script>
+{% endblock%}

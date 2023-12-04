@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>TEGnology invoice template</title>
+		<title>TEGnology quotation template</title>
 
 		<style>
 			.invoice-box {
@@ -102,31 +102,32 @@
 								<td class="title">
 									<img
 										src="{{logo_path}}"
-										style="width: 100%; max-width: 300px"
+										style="width: 100%; max-width: 300px;"
 									/>
 								</td>
 								<td></td>
 								<td style="text-align:right;">
-									Invoice #: {{invoice.invoice_number}}<br />
-									Created: {{invoice.created_date}}<br />
-									Payment Terms: Next 30 days
+									Quote Number: {{quotation.quotation_number}}<br />
+									Date: {{quotation.created_date}}<br />
+									Expiration 30 days from quotation date
 								</td>
 							</tr>
 						</table>
 					</td>
 				</tr>
+                
 
 				<tr class="information">
-					<td colspan="2">
+					<td colspan="1">
 						<table>
 							<tr>
 								<td>
-									<h2>Invoice</h2><br/>
-									<b>{{customer.name}}</b><br/>
+									<h2>Quotation</h2><br/>
+									<b>{{customer.name}}</b><br />
 									{{customer.address|linebreaks}}
-									CVR: {{customer.cvr}}<br/>
-									Attn: {{invoice.contact_person}}<br/>
-									{{invoice.contact_email}}
+									CVR: {{customer.cvr}} <br/>
+									Attn: {{quotation.contact_person}}<br />
+									{{quotation.contact_email}}
 								</td>
 								<td>
 									<h2> </h2><br/><br/><br/>
@@ -139,6 +140,19 @@
 						</table>
 					</td>
 				</tr>
+
+                <tr class="information">
+					<td colspan="1">
+						<table>
+							<tr>
+								<td>
+									{{quotation.message|linebreaks}}
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+            
 
 				<tr class="heading">
 					<td>Item</td>
@@ -160,22 +174,24 @@
 
 				<tr class="total">
 					<td></td>
-					<td>Total ex. VAT:</td>
-					<td>{{invoice.total}}</td>
+					<td>Total:</td>
+					<td>{{quotation.total}}</td>
 				</tr>
 
-				<tr class="total">
-					<td></td>
-					<td>VAT {{invoice.vat}}%:</td>
-					<td>{{invoice.vat_amt}}</td>
-				</tr>
-
-				<tr class="total">
-					<td></td>
-					<td>Total inc. VAT:</td>
-					<td>{{invoice.total_vat}}</td>
-				</tr>
 				
+                <tr class="information">
+					<td colspan="1">
+						<table>
+							<tr>
+								<td> The quoted price includes shipment.<br/>
+                                    Est. Delivery Time: {{quotation.est_delivery_time}} <br/>
+                                    All prices are in {{quotation.currency}} and excl. VAT <br/>
+                                    Terms and Conditions according to Orgalime S2022 <br/>
+                                </td>
+							</tr>
+						</table>
+					</td>
+				</tr>
 				
                 <tr class="information">
 					<td colspan="3">
@@ -184,19 +200,11 @@
 								<td>
 									{{tegnology.address|safe}}
 								</td>
-
-								<td style="text-align: left;">
-									Bank account: {{tegnology.bank_account}}<br/>
-									IBAN: {{tegnology.IBAN}}<br/>
-									SWIFT/BIC: {{tegnology.SWIFT_BIC}}<br/>
-                                    {{tegnology.bank_name}}
-								</td>
-
-                                <td style="text-align: right;">
+								<td></td>
+                                <td style="text-align:right;">
 									CVR: {{tegnology.cvr}}<br/>
-									EORI: DK{{tegnology.cvr}}<br/>
 									phone: {{tegnology.phone}}<br/>
-									e-mail: {{tegnology.email}} <br/>
+									e-mail: {{quotation.sender_email}} <br/>
 								</td>
 							</tr>
 						</table>

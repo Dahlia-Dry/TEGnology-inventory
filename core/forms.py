@@ -23,7 +23,7 @@ class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields ='__all__'
-        exclude=['filepath','line_items','total','total_vat','currency','sent_date']
+        exclude=['filepath','line_items','total','total_vat','vat_amt','currency','sent_date']
         widgets = {
             'created_date': DateInput(),
             'due_date': DateInput(),
@@ -33,7 +33,7 @@ class QuotationForm(forms.ModelForm):
     class Meta:
         model = Quotation
         fields ='__all__'
-        exclude=['filepath','sent_date']
+        exclude=['filepath','sent_date','line_items','total','currency']
         widgets = {
             'created_date': DateInput(),
         }
@@ -42,16 +42,25 @@ class OrderConfirmationForm(forms.ModelForm):
     class Meta:
         model = OrderConfirmation
         fields ='__all__'
-        exclude=['filepath','sent_date']
+        exclude=['filepath','sent_date','line_items','total','vat_amt','total_vat','currency']
         widgets = {
             'created_date': DateInput(),
+        }
+
+class PurchaseOrderForm(forms.ModelForm):
+    class Meta:
+        model = PurchaseOrder
+        fields ='__all__'
+        exclude=['filepath']
+        widgets = {
+            'received_date': DateInput(),
         }
 
 class DeliveryForm(forms.ModelForm):
     class Meta:
         model = DeliveryNotice
         fields ='__all__'
-        exclude=['filepath','sent_date']
+        exclude=['filepath','sent_date','line_items','total','currency']
         widgets = {
             'created_date': DateInput(),
         }
@@ -72,7 +81,7 @@ def gen_file_dateform(model_name,data=None,instance=None):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields =['name','order_number','contact_person','contact_email','notes']
+        fields =['name','order_number','contact_person','contact_email', 'vat','notes']
 
 class OrderStatusForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

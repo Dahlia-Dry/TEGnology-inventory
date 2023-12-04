@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>TEGnology invoice template</title>
+		<title>TEGnology order confirmation template</title>
 
 		<style>
 			.invoice-box {
@@ -107,9 +107,8 @@
 								</td>
 								<td></td>
 								<td style="text-align:right;">
-									Invoice #: {{invoice.invoice_number}}<br />
-									Created: {{invoice.created_date}}<br />
-									Payment Terms: Next 30 days
+									Purchase Order #: {{po_number}}<br />
+									Date: {{order_confirmation.created_date}}<br />
 								</td>
 							</tr>
 						</table>
@@ -117,16 +116,16 @@
 				</tr>
 
 				<tr class="information">
-					<td colspan="2">
+					<td colspan="1">
 						<table>
 							<tr>
 								<td>
-									<h2>Invoice</h2><br/>
+									<h2>Order Confirmation</h2><br/>
 									<b>{{customer.name}}</b><br/>
 									{{customer.address|linebreaks}}
 									CVR: {{customer.cvr}}<br/>
-									Attn: {{invoice.contact_person}}<br/>
-									{{invoice.contact_email}}
+									Attn: {{order_confirmation.contact_person}}<br/>
+									{{order_confirmation.contact_email}}
 								</td>
 								<td>
 									<h2> </h2><br/><br/><br/>
@@ -134,6 +133,18 @@
 									{% if customer.shipping_address is not None %}
 									{{customer.shipping_address|linebreaks}}
 									{% endif %}
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+
+				<tr class="information">
+					<td colspan="1">
+						<table>
+							<tr>
+								<td>
+									{{order_confirmation.message|linebreaks}}
 								</td>
 							</tr>
 						</table>
@@ -161,21 +172,34 @@
 				<tr class="total">
 					<td></td>
 					<td>Total ex. VAT:</td>
-					<td>{{invoice.total}}</td>
+					<td>{{order_confirmation.total}}</td>
 				</tr>
 
 				<tr class="total">
 					<td></td>
-					<td>VAT {{invoice.vat}}%:</td>
-					<td>{{invoice.vat_amt}}</td>
+					<td>VAT {{order_confirmation.vat}}%:</td>
+					<td>{{order_confirmation.vat_amt}}</td>
 				</tr>
 
 				<tr class="total">
 					<td></td>
 					<td>Total inc. VAT:</td>
-					<td>{{invoice.total_vat}}</td>
+					<td>{{order_confirmation.total_vat}}</td>
 				</tr>
 				
+				<tr class="information">
+					<td colspan="1">
+						<table>
+							<tr>
+								<td> The quoted price includes shipment.<br/>
+                                    Est. Delivery Time: {{quotation.est_delivery_time}} <br/>
+                                    All prices are in {{order_confirmation.currency}} and excl. VAT <br/>
+                                    Terms and Conditions according to Orgalime S2022 <br/>
+                                </td>
+							</tr>
+						</table>
+					</td>
+				</tr>
 				
                 <tr class="information">
 					<td colspan="3">
@@ -194,9 +218,8 @@
 
                                 <td style="text-align: right;">
 									CVR: {{tegnology.cvr}}<br/>
-									EORI: DK{{tegnology.cvr}}<br/>
 									phone: {{tegnology.phone}}<br/>
-									e-mail: {{tegnology.email}} <br/>
+									e-mail: {{order_confirmation.sender_email}} <br/>
 								</td>
 							</tr>
 						</table>

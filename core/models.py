@@ -6,8 +6,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    notify_entry = models.BooleanField(name='Notify by email when new entry added?',default=False)
-    notify_order= models.BooleanField(name='Notify by email when new order added?',default=False)
+    notify_new_entry = models.BooleanField(name='Notify by email when new entry added?',default=False)
+    notify_new_order= models.BooleanField(name='Notify by email when new order added?',default=False)
 class Product(models.Model):
     name= models.CharField(max_length=200,unique=True)
     pipedrive_id=models.IntegerField(blank=True)
@@ -39,8 +39,9 @@ class Customer(models.Model):
         return self.name
 class Order(models.Model):
     class Status(models.IntegerChoices):
-        DEAL_CLOSED=1
-        QUOTATION_SENT=2
+        DEAL_PENDING=0
+        QUOTATION_SENT=1
+        PURCHASE_ORDER_RECEIVED=2
         ORDER_CONFIRMATION_SENT=3
         INVOICE_SENT=4
         DELIVERY_SCHEDULED=5
@@ -51,8 +52,8 @@ class Order(models.Model):
     name = models.CharField(max_length=200,unique=True) 
     pipedrive_id = models.IntegerField(primary_key=True)
 
-    status = models.IntegerField(choices=Status.choices, default=Status.DEAL_CLOSED)
-    prev_status= models.IntegerField(choices=Status.choices, default=Status.DEAL_CLOSED)
+    status = models.IntegerField(choices=Status.choices, default=Status.QUOTATION_SENT)
+    prev_status= models.IntegerField(choices=Status.choices, default=Status.QUOTATION_SENT)
     status_date=models.DateField(blank=True,null=True)
     prev_status_date= models.DateField(blank=True,null=True)
 
@@ -63,11 +64,15 @@ class Order(models.Model):
     contact_person=models.CharField(max_length=100,blank=True,null=True)
     contact_email=models.CharField(max_length=100,blank=True,null=True)
     
-    total = models.FloatField()
+    total = models.CharField(max_length=50,blank=True,null=True)
+    vat = models.FloatField(default=25,verbose_name="VAT (%)",blank=True,null=True)
+    vat_amt=models.CharField(max_length=50,blank=True,null=True)
+    total_vat = models.CharField(max_length=50,blank=True,null=True)
     currency = models.CharField(max_length=3,blank=True,null=True)
     order_number=models.CharField(max_length=20,blank=True,null=True)
 
     quotation=models.ForeignKey("Quotation",blank=True,null=True,on_delete=models.SET_NULL)
+    purchase_order=models.ForeignKey("PurchaseOrder",blank=True,null=True,on_delete=models.SET_NULL)
     order_confirmation=models.ForeignKey("OrderConfirmation",blank=True,null=True,on_delete=models.SET_NULL)
     invoice=models.ForeignKey("Invoice",blank=True,null=True,on_delete=models.SET_NULL)
     delivery_notice=models.ForeignKey("DeliveryNotice",blank=True,null=True,on_delete=models.SET_NULL)
@@ -79,6 +84,13 @@ class Order(models.Model):
     def get_edit_url(self):
         return f'https://tegnology2.pipedrive.com/deal/{self.pipedrive_id}'
     def save(self, *args, **kwargs):
+        try:
+            t = float(self.total)
+            self.total = f"{t:.2f}"
+            self.total_vat = self.currency+f' {t*(1+self.vat/100):.2f}'
+            self.vat_amt = self.currency+f' {t*(self.vat/100):.2f}'
+        except Exception as e:
+            print(e)
         super(Order, self).save(*args, **kwargs)
 class Purchase(models.Model):
     order=models.ForeignKey(Order,on_delete=models.CASCADE,null=True)
@@ -100,13 +112,14 @@ class Entry(models.Model):
     quantity=models.IntegerField()
     notes = models.TextField(blank=True,null=True)
     user=models.ForeignKey(User,related_name='user',on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.quantity}x{self.product} - arrival date {self.date}\n {self.notes}"
     def get_edit_url(self):
         content_type = ContentType.objects.get_for_model(self.__class__)
         return reverse("admin:%s_%s_change" % (content_type.app_label, content_type.model), args=(self.id,))
 class Invoice(models.Model):
-    #mandatory fields
+    #base fields
     filepath = models.FilePathField() #can be generated or user upload
-
     sent_date= models.DateField(verbose_name='sent date',blank=True,null=True)
 
     #used for generating file from template
@@ -115,55 +128,52 @@ class Invoice(models.Model):
     due_date=models.DateField(blank=True,null=True)
     contact_person=models.CharField(max_length=100,blank=True,null=True)
     contact_email=models.CharField(max_length=100,blank=True,null=True)
-    
-    #calculated fields
-    line_items = models.JSONField(blank=True,null=True)
-    currency = models.CharField(max_length=3,blank=True,null=True)
-    total = models.CharField(max_length=50,blank=True,null=True)
-    vat = models.FloatField(default=0,verbose_name="VAT (%)",blank=True,null=True)
-    vat_amt=models.FloatField(default=0,blank=True,null=True)
-    total_vat = models.CharField(max_length=50,blank=True,null=True)
+    sender_email=models.CharField(max_length=50,blank=True,null=True)
 
-    def save(self, *args, **kwargs):
-        print('saving')
-        try:
-            t = self.total
-            self.total = self.currency + f" {t:.2f}"
-            self.total_vat = self.currency+f' {t*(1+self.vat/100):.2f}'
-            self.vat_amt = self.currency+f' {t*(self.vat/100):.2f}'
-        except Exception as e:
-            print(e)
-        super(Invoice, self).save(*args, **kwargs)
-
+class PurchaseOrder(models.Model):
+    po_number= models.CharField(max_length=20,null=True)
+    filepath = models.FilePathField()
+    received_date=models.DateField(null=True)
 class OrderConfirmation(models.Model):
-    #mandatory fields
+    #base fields
     filepath = models.FilePathField() #can be generated or user upload
-
     sent_date= models.DateField(verbose_name='sent date',blank=True,null=True)
-    created_date=models.DateField(blank=True,null=True)
 
-    def save(self, *args, **kwargs):
-        super(OrderConfirmation, self).save(*args, **kwargs)
+    #used for generating file from template
+    created_date=models.DateField(blank=True,null=True)
+    contact_person=models.CharField(max_length=100,blank=True,null=True)
+    contact_email=models.CharField(max_length=100,blank=True,null=True)
+    sender_email=models.CharField(max_length=50,blank=True,null=True)
+    message = models.TextField(blank=True,null=True)
 
 class DeliveryNotice(models.Model):
-    #mandatory fields
+    #base fields
     filepath = models.FilePathField() #can be generated or user upload
-
     sent_date= models.DateField(verbose_name='sent date',blank=True,null=True)
-    created_date=models.DateField(blank=True,null=True)
 
-    def save(self, *args, **kwargs):
-        super(DeliveryNotice, self).save(*args, **kwargs)
+    #used for generating file from template
+    order_number= models.CharField(max_length=20,null=True)
+    created_date=models.DateField(blank=True,null=True)
+    delivery_date=models.DateField(blank=True,null=True)
+    contact_person=models.CharField(max_length=100,blank=True,null=True)
+    contact_email=models.CharField(max_length=100,blank=True,null=True)
+    message = models.TextField(blank=True,null=True)
+    sender_email=models.CharField(max_length=50,blank=True,null=True)
+
 
 class Quotation(models.Model):
-    #mandatory fields
+    #base fields
     filepath = models.FilePathField() #can be generated or user upload
-
     sent_date= models.DateField(verbose_name='sent date',blank=True,null=True)
+    
+    #used for generating file from template
+    quotation_number= models.CharField(max_length=20,null=True)
     created_date=models.DateField(blank=True,null=True)
-
-    def save(self, *args, **kwargs):
-        super(Quotation, self).save(*args, **kwargs)
+    due_date=models.DateField(blank=True,null=True)
+    contact_person=models.CharField(max_length=100,blank=True,null=True)
+    contact_email=models.CharField(max_length=100,blank=True,null=True)
+    message = models.TextField(blank=True,null=True)
+    sender_email=models.CharField(max_length=50,blank=True,null=True)
 
 class Timestamp(models.Model):
     label = models.CharField(max_length=50)

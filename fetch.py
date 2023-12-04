@@ -22,7 +22,7 @@ def fetch_pipedrive_latest():
     'since_timestamp': t.last_updated.strftime('%Y-%m-%d %H:%M:00'),
     }
     response = client.recents.get_recent_changes(params=params)
-    new_deals = [item for item in response['data'] if item['item']=='deal' and item['data']['status']=='won']
+    new_deals = [item for item in response['data'] if item['item']=='deal' and (item['data']['status']=='won' or item['data']['stage_id']==6)]
     if len(new_deals) >0:
         return new_deals
     else:

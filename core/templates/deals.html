@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load tags %}
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Deals</h1>
+</div> 
+
+{{deals|safe}}
+
+{% if selected_order != None %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 id='order-name' class="h2">{{selected_order.name}}</h1>
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group px-1">
+            <a href="/deals/{{selected_order.pipedrive_id}}"><button type="button" class="btn btn-sm btn-secondary"> Go To Deal Page <span data-feather="arrow-right-circle"></span></button></a>
+        </div>
+    </div>
+</div> 
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-1">
+  <h4 class="h6">customer: {{selected_order.customer.name}}</h4>
+  <div class="btn-toolbar" role="toolbar">
+      <div class="btn-group px-1">
+          <a class='edit-customer' id='edit-customer' href="/customers/{{selected_order.customer.id}}/edit" data-popup-url="/customers/{{selected_order.customer.id}}/edit"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="user"></span> Edit Customer Info</button></a>
+      </div>
+  </div>
+</div>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-3 my-3">
+  <h4 class="h6">total value: {{selected_order.currency}} {{selected_order.total}}</h4>
+  <div class="btn-toolbar" role="toolbar">
+      <div class="btn-group px-1">
+        <a href="{{selected_order.get_edit_url}}"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="database"></span> Edit Line Items in Pipedrive</button></a>
+      </div>
+  </div>
+</div> 
+{{purchases|safe}}
+</div>
+{% endif %}
+{% include 'components/modals/edit-customer-modal.html' %}
+{% endblock %}
+{% block script %}
+<script>
+$('#table').on('click-row.bs.table', function (row,$el,field) {
+    //append query to url on select row to trigger 
+    var url=window.location.href;
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('id',$el[0]);
+    window.location.search = urlParams;
+})
+$(document).on("click", ".edit-customer", function (e) {
+    e.preventDefault();
+    var $popup = $("#editCustomerModal");
+    var popup_url = $(this).data("popup-url");
+    $(".modal-body", $popup).load(popup_url, function () {
+    $popup.modal("show");
+    });
+});
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+{% endblock %}

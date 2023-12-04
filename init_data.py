@@ -41,7 +41,7 @@ def create_tegnology():
         pass
     tegnology=Customer.objects.create(name='TEGnology Aps',
                                     address= """TEGnology Aps <br /> Maskinvej 5 <br /> 2860 Søborg <br /> Denmark""",
-                                    bank_account="54440240394",
+                                    bank_account="5444 0240394",
                                     IBAN="DK7054440000240394",
                                     SWIFT_BIC="ALBADKKK",
                                     bank_name="Arbejdernes Landsbank",
@@ -64,12 +64,8 @@ def clear_dbs():
     for r in invoice_records:
         r.delete()
 
-def load_pipedrive_history():
-    """This function fetches all won orders from pipedrive and logs them as Order objects"""
-    """databases should be emptied first"""
-    clear_dbs()
-    won_orders = client.deals.get_all_deals_with_filter(2)['data']
-    for d in won_orders:
+def add_orders_to_db(queryset,status):
+    for d in queryset:
         print(f"creating order record for {d['title']}")
         customer_name = d['org_id']['name']
         try:
@@ -87,12 +83,17 @@ def load_pipedrive_history():
                                     address=d['org_id']['address'],
                                     )
         customer_instance.save()
+        try:
+            close_date= datetime.datetime.strptime(d['close_time'],'%Y-%m-%d %H:%M:%S').date()
+        except Exception as e:
+            close_date=None
         order_instance = Order.objects.create(name=d['title'],
+                                            status=status,
                             pipedrive_id=d['id'],
                             status_date=datetime.datetime.strptime(d['update_time'],'%Y-%m-%d %H:%M:%S').date(),
-                            close_date = datetime.datetime.strptime(d['close_time'],'%Y-%m-%d %H:%M:%S').date(),
+                            close_date = close_date,
                             pipedrive_meta=d,
-                            total=d['weighted_value'],
+                            total=str(d['weighted_value']),
                             currency=d['formatted_value'][0],
                             customer=customer_instance,
                             contact_person=person,
@@ -100,6 +101,16 @@ def load_pipedrive_history():
         print('saving order')
         order_instance.save()
         print(f"created order record for {d['title']}")
+
+
+def load_pipedrive_history():
+    """This function fetches all won orders from pipedrive and logs them as Order objects"""
+    """databases should be emptied first"""
+    clear_dbs()
+    won_orders = client.deals.get_all_deals_with_filter(2)['data']
+    open_orders = client.deals.get_all_deals_with_filter(38)['data']
+    add_orders_to_db(won_orders,1)
+    add_orders_to_db(open_orders,0)
 
 if __name__ == '__main__':
     init_media()

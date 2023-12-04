@@ -27,7 +27,7 @@
         <tr>
         {% endif %}
             <td>{{row.0.1}}</td>
-            <td><a href="{{row.0.2}}" title="Edit in Pipedrive">{{row.0.3}}</a></td>
+            <td><a href="{{row.0.2}}">{{row.0.3}}</a></td>
             {% for cell in row %}
             {% if not forloop.first %}
             <td>{{cell}}</td>

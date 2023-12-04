@@ -2,10 +2,9 @@ from core.models import *
 from decouple import config
 from pipedrive.client import Client
 
-client = Client(domain=config('PIPEDRIVE_DOMAIN'))
-client.set_api_token(config('PIPEDRIVE_API_TOKEN'))
-
 def sync_pipedrive_latest():
+    client = Client(domain=config('PIPEDRIVE_DOMAIN'))
+    client.set_api_token(config('PIPEDRIVE_API_TOKEN'))
     t = Timestamp.objects.get(label='last_pipedrive_sync')
     params = {
     'since_timestamp': t.last_updated.strftime('%Y-%m-%d %H:%M:00'),
@@ -60,3 +59,9 @@ def sync_pipedrive_latest():
             print('saving order')
             o.save()
     t.save()
+
+def fetch_emails(setting):
+    if setting == 'notify_new_entry':
+        pass
+    elif setting == 'notify_new_order':
+        pass
