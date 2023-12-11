@@ -145,7 +145,7 @@
 
 					<td>Quantity</td>
 
-					<td>Price</td>
+					<td style="width: 120px;">Price</td>
 				</tr>
 				
 				{% for item in line_items %}
@@ -161,19 +161,19 @@
 				<tr class="total">
 					<td></td>
 					<td>Total ex. VAT:</td>
-					<td>{{invoice.total}}</td>
+					<td>{{currency}} {{total}}</td>
 				</tr>
 
 				<tr class="total">
 					<td></td>
-					<td>VAT {{invoice.vat}}%:</td>
-					<td>{{invoice.vat_amt}}</td>
+					<td>VAT {{vat}}%:</td>
+					<td>{{currency}} {{vat_amt}}</td>
 				</tr>
 
 				<tr class="total">
 					<td></td>
 					<td>Total inc. VAT:</td>
-					<td>{{invoice.total_vat}}</td>
+					<td>{{currency}} {{total_vat}}</td>
 				</tr>
 				
 				

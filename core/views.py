@@ -433,9 +433,10 @@ def gen_file(request,pk,filetype):
         item['price'] = order_instance.currency+f' {(p.quantity*p.unit_price):.2f}'
         line_items.append(item)
     file_context= {'logo_path':os.path.join(settings.STATIC_ROOT,'assets/logo.png'),
-                    'line_items':line_items,'total':order_instance.total,
-                    'vat':order_instance.vat,'vat_amt':order_instance.vat_amt,
-                    'total_vat':order_instance.total_vat}
+                    'line_items':line_items,'total':f'{order_instance.total:.2f}',
+                    'vat':f'{order_instance.vat}','vat_amt':f' {order_instance.total*(order_instance.vat/100):.2f}',
+                    'total_vat':f' {order_instance.total*(1+order_instance.vat/100):.2f}','currency':order_instance.currency}
+    print(file_context)
     file_obj.currency=order_instance.currency
     file_obj.total=order_instance.total
     print('order',order_instance.currency,order_instance.total)

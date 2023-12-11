@@ -64,10 +64,8 @@ class Order(models.Model):
     contact_person=models.CharField(max_length=100,blank=True,null=True)
     contact_email=models.CharField(max_length=100,blank=True,null=True)
     
-    total = models.CharField(max_length=50,blank=True,null=True)
+    total = models.FloatField(blank=True,null=True)
     vat = models.FloatField(default=25,verbose_name="VAT (%)",blank=True,null=True)
-    vat_amt=models.CharField(max_length=50,blank=True,null=True)
-    total_vat = models.CharField(max_length=50,blank=True,null=True)
     currency = models.CharField(max_length=3,blank=True,null=True)
     order_number=models.CharField(max_length=20,blank=True,null=True)
 
