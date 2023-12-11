@@ -459,7 +459,10 @@ def gen_file(request,pk,filetype):
         context['filepath'] = file_obj.filepath
     elif filetype=='order_confirmation':
         file_context['order_confirmation'] =file_obj
-        file_context['po_number'] = order_instance.purchase_order.po_number
+        try:
+            file_context['po_number'] = order_instance.purchase_order.po_number
+        except:
+            file_context['po_number'] = None
         output_text=render_to_string('documents/order_confirmation.html',file_context)
         pdfkit.from_string(output_text,os.path.join(settings.MEDIA_ROOT,filepath),options={"enable-local-file-access": ""})
         if request.method=='POST' and 'save' in request.POST:

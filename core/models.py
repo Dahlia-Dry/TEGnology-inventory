@@ -18,11 +18,6 @@ class Customer(models.Model):
     address = models.TextField(max_length=500,blank=True,null=True)
     cvr = models.CharField(max_length=20,blank=True,null=True)
     shipping_address = models.TextField(blank=True,null=True)
-    po_number=models.CharField(max_length=20,blank=True,null=True)
-    bank_account = models.CharField(max_length=20,blank=True,null=True)
-    IBAN=models.CharField(max_length=20,blank=True,null=True)
-    SWIFT_BIC=models.CharField(max_length=20,blank=True,null=True)
-    bank_name=models.CharField(max_length=20,blank=True,null=True)
     phone=models.CharField(max_length=20,blank=True,null=True)
     email=models.CharField(max_length=20,blank=True,null=True)
     def save(self, *args, **kwargs):

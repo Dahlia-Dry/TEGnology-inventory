@@ -117,19 +117,20 @@
                 
 
 				<tr class="information">
-					<td colspan="1">
+					<td colspan="2">
 						<table>
 							<tr>
-								<td>
+								<td style="padding-right: 10px;">
 									<h2>Delivery Notice</h2><br/>
-									<b>{{customer.name}}</b><br />
-									{{customer.address|linebreaks}}<br />
-									Attn: {{delivery_notice.contact_person}}<br />
+									<h4>{{customer.name}}</h4>
+									{{customer.address|linebreaks}}
+									CVR: {{customer.cvr}}<br/>
+									Attn: {{delivery_notice.contact_person}}<br/>
 									{{delivery_notice.contact_email}}
 								</td>
-								<td>
-									<h2> </h2><br/><br/><br/>
-									Shipping Address (if different from billing address):<br/>
+								<td style="text-align: left;">
+									<h2></h2><br/>
+									<p style="padding-top: 49px; padding-bottom: 3px;">Shipping Address (if different from billing address):</p>
 									{% if customer.shipping_address is not None %}
 									{{customer.shipping_address|linebreaks}}
 									{% endif %}

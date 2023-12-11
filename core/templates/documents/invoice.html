@@ -120,17 +120,17 @@
 					<td colspan="2">
 						<table>
 							<tr>
-								<td>
+								<td style="padding-right: 10px;">
 									<h2>Invoice</h2><br/>
-									<b>{{customer.name}}</b><br/>
+									<h4>{{customer.name}}</h4>
 									{{customer.address|linebreaks}}
 									CVR: {{customer.cvr}}<br/>
 									Attn: {{invoice.contact_person}}<br/>
 									{{invoice.contact_email}}
 								</td>
-								<td>
-									<h2> </h2><br/><br/><br/>
-									Shipping Address (if different from billing address):<br/>
+								<td style="text-align: left;">
+									<h2></h2><br/>
+									<p style="padding-top: 49px; padding-bottom: 3px;">Shipping Address (if different from billing address):</p>
 									{% if customer.shipping_address is not None %}
 									{{customer.shipping_address|linebreaks}}
 									{% endif %}
