@@ -1,10 +1,10 @@
 {% load tags %}
 {% if file_obj is not None %}
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-2">
-        <h1 class="h2">{{filetype|as_title}}</h1>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-1">
+        <h1 class="h4">{{filetype|as_title}}</h1>
             <div class="btn-toolbar" role="toolbar">
                 <div class="btn-group px-1">
-                    <a href="/orders/{{selected_order.pipedrive_id}}/{{filetype}}" target="_blank"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="eye"></span> View File</button></a>
+                    <a href="/orders/{{selected_order.pipedrive_id}}/{{filetype}}" target="_blank"><button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="View+Print PDF"><span data-feather="printer"></span></button></a>
                 </div>
                 <div class="btn-group px-1">
                     <form method="POST">
@@ -12,53 +12,38 @@
                         <input type="hidden" name="form_id" value="delete_file">
                         <input type="hidden" name="filetype" value="{{filetype}}">
                         <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
-                        <button type="submit" class="btn btn-sm btn-outline-danger"><span data-feather="trash"></span> Delete file</button>
+                        <button type="submit" class="btn btn-sm btn-outline-danger" data-toggle="tooltip" data-placement="top" title="Delete File"><span data-feather="trash"></span></button>
                     </form>
                 </div>
+                {% if file_obj.sent_date is None %}
+                <div class="btn-group px-1">
+                    <a class='{{filetype}}-mark-sent' id='{{filetype}}-mark-sent' href="/orders/{{selected_order.pipedrive_id}}/send-{{filetype}}" data-popup-url="/orders/{{selected_order.pipedrive_id}}/send-{{filetype}}" data-toggle="tooltip" data-placement="top" title="Mark as Sent"><button type="button" class="btn btn-sm btn-outline-success"><span data-feather="send"></span></button></a>
+                </div>
+                {% else %}
+                
+                <div class="btn-group px-1">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_id" value="undo_set_date">
+                        <input type="hidden" name="filetype" value="{{filetype}}">
+                        <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
+                        <div class="btn-group px-1">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Undo Mark as Sent"><span data-feather="rotate-ccw"></span><span data-feather="send"></span></button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
             </div>
     </div>
-    {% if file_obj.sent_date is None %}
-    <form method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="form_id" value="set_date">
-        <input type="hidden" name="filetype" value="{{filetype}}">
-        <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-2 border-bottom">
-            {% with forms=file_form|key:filetype %}
-            {{forms.date.as_p}}
-            {% endwith %}
-            <div class="btn-toolbar" role="toolbar">
-                <div class="btn-group px-1">
-                    <button type="submit" class="btn btn-sm btn-outline-success"><span data-feather="send"></span> Mark as Sent</button>
-                </div>
-            </div>
-        </div>
-    </form>
-    {% else %}
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-2 border-bottom">
-        <h4 class="h6" id="order-status">sent date: {{file_obj.sent_date}}</h4>
-        <div class=class="btn-toolbar" role="toolbar">
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="form_id" value="undo_set_date">
-                <input type="hidden" name="filetype" value="{{filetype}}">
-                <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
-                <div class="btn-group px-1">
-                    <button type="submit" class="btn btn-sm btn-outline-secondary"><span data-feather="rotate-ccw"></span> Undo Mark as Sent</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    {% endif %}
-    {% else %}
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-3">
-        <h1 class="h2">{{filetype|as_title}}</h1>
+{% else %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-1">
+        <h1 class="h4">{{filetype|as_title}}</h1>
         <div class="btn-toolbar" role="toolbar">
-            <div class="btn-group px-1">
-                <a href="/orders/{{selected_order.pipedrive_id}}/{{filetype}}/generate"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="file-plus"></span> Generate</button></a>
+            <div class="btn-group btn-sm px-1">
+                <a href="/orders/{{selected_order.pipedrive_id}}/{{filetype}}/generate"><button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Generate PDF"><span data-feather="file-plus"></span></button></a>
             </div>
-            <div class="btn-group px-1">
-                <a class='upload-file' id='upload-file' name={{filetype}} href="/orders/{{selected_order.pipedrive_id}}/{{filetype}}/upload" data-popup-url="/orders/{{selected_order.pipedrive_id}}/{{filetype}}/upload"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="upload"></span> Upload</button></a>
+            <div class="btn-group btn-sm px-1">
+                <a class='upload-file' id='upload-file' name={{filetype}} href="/orders/{{selected_order.pipedrive_id}}/{{filetype}}/upload" data-popup-url="/orders/{{selected_order.pipedrive_id}}/{{filetype}}/upload"><button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="Upload File"><span data-feather="upload"></span></button></a>
             </div>
             <div class="modal fade" id="upload{{filetype}}Modal" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog" role="document">
@@ -82,6 +67,29 @@
             </div>
         </div>
     </div>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-3 border-bottom">
-    </div>
 {% endif %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom" style="height: 30px;">
+    {% if file_obj.sent_date is not None %}
+    <p>sent date: {{file_obj.sent_date}}</p>
+    {% endif %}
+</div>
+<div class="modal fade" id="{{filetype}}SentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form method="POST" class="modal-content">
+            {% csrf_token %}
+            <input type="hidden" name="form_id" value="set_date">
+            <input type="hidden" name="filetype" value="{{filetype}}">
+            <div class="modal-header">
+              <h5 class="modal-title">Mark {{filetype|as_title}} as sent</h5>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-sm btn-outline-success">Save</button>
+            </div>
+        </form>
+      </div>
+</div>
+</div>
+

@@ -1,10 +1,10 @@
 {% load tags %}
 {% if file_obj is not None %}
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-2">
-        <h1 class="h2">{{filetype|as_title}}</h1>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-1">
+        <h1 class="h4">{{filetype|as_title}}</h1>
             <div class="btn-toolbar" role="toolbar">
                 <div class="btn-group px-1">
-                    <a href="/orders/{{selected_order.pipedrive_id}}/{{filetype}}" target="_blank"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="eye"></span> View File</button></a>
+                    <a href="/orders/{{selected_order.pipedrive_id}}/{{filetype}}" target="_blank"><button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="tooltip" data-placement="top" title="View+Print PDF"><span data-feather="printer"></span></button></a>
                 </div>
                 <div class="btn-group px-1">
                     <form method="POST">
@@ -12,20 +12,20 @@
                         <input type="hidden" name="form_id" value="delete_file">
                         <input type="hidden" name="filetype" value="{{filetype}}">
                         <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
-                        <button type="submit" class="btn btn-sm btn-outline-danger"><span data-feather="trash"></span> Delete file</button>
+                        <button type="submit" class="btn btn-sm btn-outline-danger" data-toggle="tooltip" data-placement="top" title="Delete File"><span data-feather="trash"></span></button>
                     </form>
                 </div>
             </div>
     </div>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-2 border-bottom">
-        <h4 class="h6">received date: {{file_obj.received_date}}</h4>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom" style="height: 30px;">
+        <p>received date: {{file_obj.received_date}}</p>
     </div>
     {% else %}
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-3">
-        <h1 class="h2">{{filetype|as_title}}</h1>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-1">
+        <h1 class="h4">{{filetype|as_title}}</h1>
         <div class="btn-toolbar" role="toolbar">
             <div class="btn-group px-1">
-                <a class='upload-file' id='upload-file' name={{filetype}} href="/orders/{{selected_order.pipedrive_id}}/{{filetype}}/upload" data-popup-url="/orders/{{selected_order.pipedrive_id}}/{{filetype}}/upload"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="upload"></span> Upload</button></a>
+                <a class='upload-file' id='upload-file' name={{filetype}} href="/orders/{{selected_order.pipedrive_id}}/{{filetype}}/upload" data-popup-url="/orders/{{selected_order.pipedrive_id}}/{{filetype}}/upload" data-toggle="tooltip" data-placement="top" title="Upload File"><button type="button" class="btn btn-sm btn-outline-secondary"><span data-feather="upload"></span></button></a>
             </div>
             <div class="modal fade" id="upload{{filetype}}Modal" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog" role="document">
@@ -49,6 +49,6 @@
             </div>
         </div>
     </div>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-3 border-bottom">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom" style="height: 30px;">
     </div>
 {% endif %}

@@ -231,7 +231,7 @@ def order_detail(request,pk):
                         order.purchase_order=po
                         order.save()
     try:
-        progress= int(((order.status-1)/(len(Order.Status)-1))*100)
+        progress= int(((order.status)/(len(Order.Status)-1))*100)
         print(progress)
         files= {f:getattr(order,f) for f in file_objs}
         file_forms={f:{'date':gen_file_dateform(file_objs[f]['obj'])} for f in file_objs if f!= 'purchase_order'}
@@ -369,6 +369,12 @@ def edit_order_status(request,pk):
     return render(request,'components/edit_obj.html',{'form':form,'pk':pk})
 
 @login_required
+def mark_sent(request,pk,filetype):
+    order=get_object_or_404(Order, pipedrive_id=int(pk))
+    form=gen_file_dateform(file_objs[filetype]['obj'])
+    return render(request,'components/edit_obj.html',{'form':form,'pk':pk})
+
+@login_required
 def edit_order_meta(request,pk):
     order=get_object_or_404(Order, pipedrive_id=int(pk))
     form=OrderForm(instance=order)
@@ -413,7 +419,7 @@ def gen_file(request,pk,filetype):
         setattr(file_obj,key,initial[key])
         file_obj.save()
     if request.method=='POST':
-        if request.POST['form_id'] =='generate_file':
+        if request.POST['form_id']=='generate_file':
             form = file_objs[filetype]['form'](request.POST,instance=file_obj)
             if form.is_valid():
                 form.save()
@@ -422,6 +428,7 @@ def gen_file(request,pk,filetype):
             customer_form = CustomerForm(request.POST, instance=customer)
             if customer_form.is_valid():
                 customer_form.save()
+    print('DATE',file_obj.created_date)
     context['form']=form
     context['customer']=customer=order_instance.customer
     purchases = Purchase.objects.filter(order=order_instance)
@@ -430,6 +437,7 @@ def gen_file(request,pk,filetype):
         item = {}
         item['name'] = p.product.name
         item['quantity'] = p.quantity
+        item['price_per'] = p.unit_price
         item['price'] = order_instance.currency+f' {(p.quantity*p.unit_price):.2f}'
         line_items.append(item)
     file_context= {'logo_path':os.path.join(settings.STATIC_ROOT,'assets/logo.png'),

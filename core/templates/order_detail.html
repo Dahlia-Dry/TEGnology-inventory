@@ -90,14 +90,14 @@
             {% endfor %}
             <div class="status-checkpoint">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-2">
-                    <h1 class="h2">Delivery Confirmation</h1>
+                    <h1 class="h4">Delivery Confirmation</h1>
                 </div>
                 {% if selected_order.status != 6 %}
                 <form method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="form_id" value="mark_complete">
                     <input type="hidden" name ="pk" id="pk" value="{{selected_order.pipedrive_id}}">
-                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-3 border-bottom">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-1 border-bottom">
                         {{complete_form.as_p}}
                         <div class="btn-toolbar" role="toolbar">
                             <div class="btn-group px-1">
@@ -130,7 +130,22 @@
 {% include 'components/modals/edit-customer-modal.html' %}
 {% endblock %}
 {% block script %}
+{% for filetype, file_obj in files.items %}
 <script>
+    $(document).on("click", ".{{filetype}}-mark-sent", function (e) {
+        e.preventDefault();
+        var $popup = $("#{{filetype}}SentModal");
+        var popup_url = $(this).data("popup-url");
+        $(".modal-body", $popup).load(popup_url, function () {
+        $popup.modal("show");
+        });
+    });
+</script>
+{% endfor %}
+<script>
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
 $(document).on("click", ".edit-customer", function (e) {
     e.preventDefault();
     var $popup = $("#editCustomerModal");
