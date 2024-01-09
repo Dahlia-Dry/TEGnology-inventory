@@ -14,8 +14,12 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.files.storage import FileSystemStorage
+from pipedrive.client import Client
 
 from .utils import *
+
+client = Client(domain=config('PIPEDRIVE_DOMAIN'))
+client.set_api_token(config('PIPEDRIVE_API_TOKEN'))
 
 if settings.DEBUG:
     host='http://127.0.0.1:8000' #localhost
@@ -278,6 +282,15 @@ def inventory(request):
                             from_email=settings.EMAIL_HOST_USER, 
                             recipient_list=[settings.ADMIN_EMAIL], 
                             fail_silently=False)
+        elif request.POST['form_id']=="add_new_product":
+            form=ProductForm(request.POST)
+            if form.is_valid():
+                product=form.save(commit=False)
+                #Add to Pipedrive also and fetch id
+                response = client.products.create_product({'name':product.name})
+                print(response)
+                product.pipedrive_id=response['data']['id']
+                product.save()
         elif request.POST['form_id'] == "delete_entries":
             pks = request.POST['entry_pks'].split(',')
             for pk in pks:
@@ -303,7 +316,8 @@ def inventory(request):
                     pass
     context={'menu_items':page_items,
              'currentpage':'Inventory',
-             'entryform':EntryForm(initial={'user':request.user})}
+             'entryform':EntryForm(initial={'user':request.user}),
+             'productform':ProductForm()}
     entries = Entry.objects.all()
     entry_context={}
     entry_context['keys'] = ['product','date','quantity','user']

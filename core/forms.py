@@ -8,6 +8,12 @@ class EntryForm(forms.ModelForm):
         model = Entry
         fields ='__all__'
 
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields ='__all__'
+        exclude=['pipedrive_id']
+
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile

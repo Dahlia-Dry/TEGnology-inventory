@@ -108,21 +108,8 @@ def load_pipedrive_history():
     add_orders_to_db(won_orders,1)
     add_orders_to_db(open_orders,0)
 
-def add_products():
-    response = client.products.get_all_products()['data']
-    for product in response:
-        try:
-            product_instance=Product.objects.get(name=product['name'])
-        except:
-            product_instance= Product.objects.create(name=product['name'],
-                                    pipedrive_id=product['id']
-                                    )
-        product_instance.save()
-        print(product_instance.name)
-
 if __name__ == '__main__':
     init_media()
     create_timestamp()
     create_tegnology()
     load_pipedrive_history()
-    add_products()
