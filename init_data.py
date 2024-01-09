@@ -26,7 +26,7 @@ def create_timestamp():
     t.save()
 
 def init_media():
-    os.system('rm -rf core/media')
+    os.system('rm -rf media')
     os.system('mkdir media')
     os.system('mkdir media/order_confirmations')
     os.system('mkdir media/invoices')
@@ -41,10 +41,6 @@ def create_tegnology():
         pass
     tegnology=Customer.objects.create(name='TEGnology Aps',
                                     address= """TEGnology Aps <br /> Maskinvej 5 <br /> 2860 Søborg <br /> Denmark""",
-                                    bank_account="5444 0240394",
-                                    IBAN="DK7054440000240394",
-                                    SWIFT_BIC="ALBADKKK",
-                                    bank_name="Arbejdernes Landsbank",
                                     cvr="33370873",
                                     phone="+45 22837732",
                                     email="info@TEGnology.dk")
@@ -112,8 +108,21 @@ def load_pipedrive_history():
     add_orders_to_db(won_orders,1)
     add_orders_to_db(open_orders,0)
 
+def add_products():
+    response = client.products.get_all_products()['data']
+    for product in response:
+        try:
+            product_instance=Product.objects.get(name=product['name'])
+        except:
+            product_instance= Product.objects.create(name=product['name'],
+                                    pipedrive_id=product['id']
+                                    )
+        product_instance.save()
+        print(product_instance.name)
+
 if __name__ == '__main__':
     init_media()
     create_timestamp()
     create_tegnology()
     load_pipedrive_history()
+    add_products()
