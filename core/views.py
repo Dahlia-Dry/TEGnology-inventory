@@ -31,8 +31,9 @@ home_items = [('Dashboard','','activity'),
               ('Orders','/orders','inbox'),
               ('Inventory','/inventory','package'),
               ('Customers','/customers','users'),
-              ('User Profile','/profile','user')]
-page_items = [(x[0],os.path.join('../',x[1]), x[2]) for x in home_items]
+              ('User Profile','/profile','user'),
+              ('Info','https://arc.net/e/5CBAEFB9-943B-4F3B-8A55-5C5E5FECF1AA','info')]
+page_items = [(x[0],os.path.join('../',x[1]), x[2]) for x in home_items[:-1]] + [home_items[-1]]
 file_objs = {'quotation':{'status':1,'obj':Quotation,'form':QuotationForm},
             'purchase_order':{'status':2,'obj':PurchaseOrder,'form':PurchaseOrderForm},
              'order_confirmation':{'status':3,'obj':OrderConfirmation,'form':OrderConfirmationForm},
