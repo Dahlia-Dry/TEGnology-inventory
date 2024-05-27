@@ -87,7 +87,7 @@ def gen_file_dateform(model_name,data=None,instance=None):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields =['name','order_number','contact_person','contact_email', 'vat','notes']
+        fields =['name','order_number','contact_person','contact_email','vat','currency','notes']
 
 class OrderStatusForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

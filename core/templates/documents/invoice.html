@@ -33,6 +33,10 @@
 				padding-bottom: 20px;
 			}
 
+			.invoice-box table tr.bottom table td {
+				padding-top: 80px;
+			}
+
 			.invoice-box table tr.top table td.title {
 				font-size: 45px;
 				line-height: 45px;
@@ -61,8 +65,16 @@
 				border-bottom: none;
 			}
 
-			.invoice-box table tr.total td:nth-child(2) {
+			.invoice-box table tr.total td:nth-child(2){
 				font-weight: bold;
+				border-top: 1px solid #eee;
+				border-bottom: 1px solid #eee;
+			}
+
+			.invoice-box table tr.total td:nth-child(3){
+				font-weight: bold;
+				border-top: 1px solid #eee;
+				border-bottom: 1px solid #eee;
 			}
 
             .invoice-box {
@@ -154,13 +166,13 @@
 				</tr>
 				{% endfor %}
 
-				<tr class="total">
+				<tr >
 					<td></td>
 					<td>Total ex. VAT:</td>
 					<td>{{currency}} {{total}}</td>
 				</tr>
 
-				<tr class="total">
+				<tr>
 					<td></td>
 					<td>VAT {{vat}}%:</td>
 					<td>{{currency}} {{vat_amt}}</td>
@@ -173,7 +185,7 @@
 				</tr>
 				
 				
-                <tr class="information">
+                <tr class="bottom">
 					<td colspan="3">
 						<table>
 							<tr>
